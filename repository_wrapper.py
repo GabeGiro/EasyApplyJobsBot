@@ -36,6 +36,17 @@ def verify_jobs(jobs):
             utils.logDebugMessage(f"Error verifying jobs: {e}", utils.MessageTypes.ERROR)
 
     return jobs
+
+
+def get_job(linkedin_job_id: str):
+    if initialized:
+        try:
+            utils.logDebugMessage(f"Getting job: {linkedin_job_id}")
+            return backend_api.get_job_by_linkedin_job_id(linkedin_job_id)
+        except Exception as e:
+            utils.logDebugMessage(f"Error getting job: {e}", utils.MessageTypes.ERROR)
+
+    return None
     
 
 def update_job(job: models.Job):
