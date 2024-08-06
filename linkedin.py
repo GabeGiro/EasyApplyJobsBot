@@ -518,4 +518,3 @@ class Linkedin:
             button.click()
         except Exception as e:
             # If click fails, use JavaScript to click on the button
-            self.driver.execute_script("arguments[0].click();", button)
