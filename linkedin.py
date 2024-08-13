@@ -176,7 +176,9 @@ class Linkedin:
 
             jobTitleAnchor = jobItem.find_elements(By.XPATH, ".//a[contains(@class, 'job-card-container__link job-card-list__title')]")
             if len(jobTitleAnchor) > 0:
-                jobTitle = jobTitleAnchor[0].text.strip()
+                allTexts = jobTitleAnchor[0].text.split("\n")
+                uniqueTexts = list(dict.fromkeys(allTexts))
+                jobTitle = uniqueTexts[0].strip()
                 if self.isTitleBlacklisted(jobTitle):
                     if config.displayWarnings:
                         prYellow(f"⚠️  Not adding a job as the title '{jobTitle}' is blacklisted")
