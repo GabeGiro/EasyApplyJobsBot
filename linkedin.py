@@ -1,6 +1,4 @@
 import math
-import time
-
 import config
 import constants
 import models
@@ -14,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from utils import prGreen, prRed, prYellow
 from webdriver_manager.chrome import ChromeDriverManager
+from typing import List
 
 
 # This class is responsible for handling the LinkedIn job application process
@@ -77,7 +76,7 @@ class Linkedin:
         try:
             jobCounter = models.JobCounter()
 
-            urlData = utils.LinkedinUrlGenerate().generateUrlLinks()
+            urlData = utils.LinkedinUrlGenerator().generateSearchUrls()
 
             for url in urlData:        
                 self.goToUrl(url)
@@ -116,6 +115,12 @@ class Linkedin:
             with open("page_source_at_unhandled_exception.html", "w") as file:
                 file.write(self.driver.page_source)
 
+
+    def goToJobsSearchPage(self):
+        searchUrl = utils.LinkedinUrlGenerator.getGeneralSearchUrl()
+        self.goToUrl(searchUrl)
+        utils.sleepInBetweenActions()
+
     
     def goToUrl(self, url):
         self.driver.get(url)
@@ -133,7 +138,7 @@ class Linkedin:
         jobCounter.total += 1
         utils.sleepInBetweenBatches(jobCounter.total)
 
-        jobProperties = self.getJobProperties(jobID=jobID)
+        jobProperties = self.getJobProperties(jobID)
         repository_wrapper.update_job(jobProperties)
         if self.isJobBlacklisted(company=jobProperties.company, title=jobProperties.title): 
             jobCounter.skipped_blacklisted += 1
@@ -149,7 +154,7 @@ class Linkedin:
         return jobCounter
     
     
-    def getJobsFromSearchPage(self):
+    def getJobsFromSearchPage(self) -> List[models.JobForVerification]:
         jobsListItems = self.driver.find_elements(By.XPATH,'//li[@data-occludable-job-id]')
         jobsForVerification = []
         companyName = None
@@ -247,7 +252,7 @@ class Linkedin:
         return upload_button_present and resume_container_present
 
 
-    def getJobProperties(self, jobID: str): 
+    def getJobProperties(self, jobID: str) -> models.Job: 
         jobTitle = self.getJobTitle()
         jobCompany = ""
         jobLocation = self.getJobLocation()
