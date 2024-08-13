@@ -16,6 +16,21 @@ from utils import prGreen, prRed, prYellow
 from webdriver_manager.chrome import ChromeDriverManager
 
 
+# This class is responsible for handling the LinkedIn job application process
+# It uses the Selenium WebDriver to interact with the LinkedIn website
+# It also uses the repository_wrapper to interact with the backend
+#
+# The class is responsible for:
+# - Logging in to LinkedIn (done in the constructor)
+# - Searching for jobs
+# - Applying to jobs
+# - Handling job posts
+# - Handling questions
+# - Handling multiple pages of the application process
+# - Handling the resume selection
+# - Handling the submission of the application
+# - Handling the follow company checkbox
+# - Handling the application of the job
 class Linkedin:
     def __init__(self):
         prYellow("🌐 The Bot is starting.")
@@ -518,3 +533,5 @@ class Linkedin:
             button.click()
         except Exception as e:
             # If click fails, use JavaScript to click on the button
+            pass
+
