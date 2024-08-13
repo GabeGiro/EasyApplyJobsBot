@@ -284,12 +284,21 @@ class Linkedin:
         jobTitle = ""
 
         try:
-            jobTitleElement = self.driver.find_element(By.XPATH, "//h1[contains(@class, 'job-title')]")
-            jobTitle = jobTitleElement.text.strip()
+            jobTitle = self.getJobTitleMethod2()
         except Exception as e:
             utils.logDebugMessage("in getting jobTitle", utils.MessageTypes.WARNING, e)
 
         return jobTitle
+    
+
+    def getJobTitleMethod1(self):
+        jobTitleElement = self.driver.find_element(By.XPATH, "//h1[contains(@class, 'job-title')]")
+        return jobTitleElement.text.strip()
+    
+
+    def getJobTitleMethod2(self):
+        jobTitleElement = self.driver.find_element(By.CSS_SELECTOR, "h1.t-24.t-bold.inline")
+        return jobTitleElement.text.strip()
     
 
     def getJobCompany(self, primary_description_div):
