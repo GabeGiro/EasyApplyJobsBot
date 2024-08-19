@@ -3,15 +3,15 @@ import config
 import constants
 import models
 import repository_wrapper
-import utils
 import warnings
+from utils import sleeper, url_generator, utils, logger
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from utils import prGreen, prRed, prYellow
+from logger.logger import prGreen, prRed, prYellow
 from webdriver_manager.chrome import ChromeDriverManager
 from typing import List
 
@@ -53,11 +53,11 @@ class Linkedin:
             prYellow("🔄 Trying to log in linkedin...")
             try:    
                 self.driver.find_element("id","username").send_keys(config.email)
-                utils.sleepInBetweenActions(1,2)
+                sleeper.sleepInBetweenActions(1,2)
                 self.driver.find_element("id","password").send_keys(config.password)
-                utils.sleepInBetweenActions(1, 2)
+                sleeper.sleepInBetweenActions(1, 2)
                 self.driver.find_element("xpath",'//button[@type="submit"]').click()
-                utils.sleepInBetweenActions(3, 7)
+                sleeper.sleepInBetweenActions(3, 7)
                 self.checkIfLoggedIn()
             except:
                 prRed("❌ Couldn't log in Linkedin by using Chrome. Please check your Linkedin credentials on config files line 7 and 8. If error continue you can define Chrome profile or run the bot on Firefox")
@@ -77,12 +77,12 @@ class Linkedin:
         try:
             jobCounter = models.JobCounter()
 
-            urlData = utils.LinkedinUrlGenerator().generateSearchUrls()
+            urlData = url_generator.LinkedinUrlGenerator().generateSearchUrls()
 
             for url in urlData:        
                 self.goToUrl(url)
 
-                urlWords = utils.urlToKeywords(url)
+                urlWords = url_generator.urlToKeywords(url)
                 
                 try:
                     totalJobs = self.wait.until(EC.presence_of_element_located((By.XPATH, '//small'))).text # TODO - fix finding total jobs
@@ -111,21 +111,21 @@ class Linkedin:
                     " jobs out of " + str(jobCounter.total) + ".")
 
         except Exception as e:
-            utils.logDebugMessage("Unhandled exception in startApplying", utils.MessageTypes.ERROR, e, True)
+            logger.logDebugMessage("Unhandled exception in startApplying", logger.MessageTypes.ERROR, e, True)
             self.driver.save_screenshot("unhandled_exception.png")
             with open("page_source_at_unhandled_exception.html", "w") as file:
                 file.write(self.driver.page_source)
 
 
     def goToJobsSearchPage(self):
-        searchUrl = utils.LinkedinUrlGenerator.getGeneralSearchUrl()
+        searchUrl = url_generator.LinkedinUrlGenerator.getGeneralSearchUrl()
         self.goToUrl(searchUrl)
-        utils.sleepInBetweenActions()
+        sleeper.sleepInBetweenActions()
 
     
     def goToUrl(self, url):
         self.driver.get(url)
-        utils.sleepInBetweenActions()
+        sleeper.sleepInBetweenActions()
         
 
     def goToJobPage(self, jobID):
@@ -137,7 +137,7 @@ class Linkedin:
     def processJob(self, jobID: str, jobCounter: models.JobCounter):
         jobPage = self.goToJobPage(jobID)
         jobCounter.total += 1
-        utils.sleepInBetweenBatches(jobCounter.total)
+        sleeper.sleepInBetweenBatches(jobCounter.total)
 
         jobProperties = self.getJobProperties(jobID)
         repository_wrapper.update_job(jobProperties)
@@ -195,7 +195,7 @@ class Linkedin:
                     title=jobTitle,
                     company=companyName))
             else:
-                utils.logDebugMessage("Couldn't find jobID, jobTitle or companyName", utils.MessageTypes.WARNING)
+                logger.logDebugMessage("Couldn't find jobID, jobTitle or companyName", logger.MessageTypes.WARNING)
 
         return jobsForVerification
     
@@ -275,7 +275,7 @@ class Linkedin:
             jobPostedDate = self.getJobPostedDate(primary_description_div)
             numberOfApplicants = self.getNumberOfApplicants(primary_description_div)
         else:
-            utils.logDebugMessage("in getting primary_description_div", utils.MessageTypes.WARNING)
+            logger.logDebugMessage("in getting primary_description_div", logger.MessageTypes.WARNING)
 
         return models.Job(
             title=jobTitle,
@@ -295,7 +295,7 @@ class Linkedin:
         try:
             jobTitle = self.getJobTitleMethod2()
         except Exception as e:
-            utils.logDebugMessage("in getting jobTitle", utils.MessageTypes.WARNING, e)
+            logger.logDebugMessage("in getting jobTitle", logger.MessageTypes.WARNING, e)
 
         return jobTitle
     
@@ -327,7 +327,7 @@ class Linkedin:
             jobCompanyLink = primary_description_div.find_element(By.CSS_SELECTOR, "a.app-aware-link")
             jobCompany = jobCompanyLink.text.strip()
         else:
-            utils.logDebugMessage("in getting jobCompany", utils.MessageTypes.WARNING)
+            logger.logDebugMessage("in getting jobCompany", logger.MessageTypes.WARNING)
 
         return jobCompany
     
@@ -341,7 +341,7 @@ class Linkedin:
             jobCompany = jobCompanyElement.text.strip()
             
         else:
-            utils.logDebugMessage("in getting jobCompany card", utils.MessageTypes.WARNING)
+            logger.logDebugMessage("in getting jobCompany card", logger.MessageTypes.WARNING)
 
         return jobCompany
     
@@ -353,7 +353,7 @@ class Linkedin:
             jobLocationSpan = primary_description_div.find_element(By.XPATH, ".//span[contains(@class, 'tvm__text--low-emphasis')][1]")
             jobLocation = jobLocationSpan.text.strip()
         except Exception as e:
-            utils.logDebugMessage("in getting jobLocation", utils.MessageTypes.WARNING, e)
+            logger.logDebugMessage("in getting jobLocation", logger.MessageTypes.WARNING, e)
 
         return jobLocation
 
@@ -365,7 +365,7 @@ class Linkedin:
             postedDateSpan = primary_description_div.find_element(By.XPATH, ".//span[contains(@class, 'tvm__text--low-emphasis')][3]")
             jobPostedDate = postedDateSpan.text.strip()
         except Exception as e:
-            utils.logDebugMessage("Error in getting jobPostedDate", utils.MessageTypes.WARNING, e)
+            logger.logDebugMessage("Error in getting jobPostedDate", logger.MessageTypes.WARNING, e)
 
         return jobPostedDate
 
@@ -377,7 +377,7 @@ class Linkedin:
             applicationsSpan = primary_description_div.find_element(By.XPATH, ".//span[contains(@class, 'tvm__text--low-emphasis')][5]")
             jobApplications = applicationsSpan.text.strip()
         except Exception as e:
-            utils.logDebugMessage("Error in getting jobApplications", utils.MessageTypes.WARNING, e)
+            logger.logDebugMessage("Error in getting jobApplications", logger.MessageTypes.WARNING, e)
 
         return jobApplications
 
@@ -388,7 +388,7 @@ class Linkedin:
         try:
             jobWorkPlaceType = self.driver.find_element(By.XPATH,"//span[contains(@class, 'workplace-type')]").get_attribute("innerHTML").strip()
         except Exception as e:
-            utils.logDebugMessage("in getting jobWorkPlaceType", utils.MessageTypes.WARNING, e)
+            logger.logDebugMessage("in getting jobWorkPlaceType", logger.MessageTypes.WARNING, e)
             
         return jobWorkPlaceType
 
@@ -400,7 +400,7 @@ class Linkedin:
         try:
             jobDescription = self.driver.find_element(By.XPATH, "//div[contains(@class, 'job-details-jobs')]//div").text.replace("·", "|")
         except Exception as e:
-            utils.logDebugMessage("in getting jobDescription: ", utils.MessageTypes.WARNING, e)
+            logger.logDebugMessage("in getting jobDescription: ", logger.MessageTypes.WARNING, e)
 
         return jobDescription   
     
