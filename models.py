@@ -15,7 +15,7 @@ class Job:
 
 @dataclass
 class JobForVerification:
-    linkedin_job_id: str
+    linkedinJobId: str
     title: str
     company: str
     workplace_type: str
