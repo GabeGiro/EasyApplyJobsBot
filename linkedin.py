@@ -101,7 +101,7 @@ class Linkedin:
                         verifiedJobs = repository_wrapper.verify_jobs(jobsForVerification)
 
                         for job in verifiedJobs:
-                            jobCounter = self.processJob(jobID=job.linkedin_job_id, jobCounter=jobCounter)
+                            jobCounter = self.processJob(jobID=job.linkedinJobId, jobCounter=jobCounter)
                                     
                 except TimeoutException:
                     prRed("0 jobs found for: " + urlWords[0] + " in " + urlWords[1])
@@ -370,12 +370,20 @@ class Linkedin:
         jobApplications = ""
 
         try:
-            applicationsSpan = primary_description_div.find_element(By.XPATH, ".//span[contains(@class, 'tvm__text--low-emphasis')][5]")
-            jobApplications = applicationsSpan.text.strip()
+            # Find all spans with the class 'tvm__text--low-emphasis'
+            applicationsSpans = primary_description_div.find_elements(By.XPATH, ".//span[contains(@class, 'tvm__text--low-emphasis')]")
+            # Loop through all found spans in reverse order because the number of applicants is usually the last one
+            for span in reversed(applicationsSpans):
+                span_text = span.text.strip()
+                # Check if the text contains a number and the keyword 'appl' (from 'applicants' or 'applications')
+                if any(char.isdigit() for char in span_text) and 'appl' in span_text.lower():
+                    jobApplications = span_text
+                    break
         except Exception as e:
             utils.logDebugMessage("Error in getting jobApplications", utils.MessageTypes.WARNING, e)
 
         return jobApplications
+
 
 
     def getJobWorkPlaceTypeFromJobPage(self) -> str:

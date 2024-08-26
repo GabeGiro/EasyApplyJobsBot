@@ -179,6 +179,11 @@ class test_getting_job_details_from_linkedin_job_post(unittest.TestCase):
             f"The number of applicants string should contain 'applicant' or 'people'."
             f"Got: {number_of_applicants_from_job_page}"
         )
+
+
+    def test_getting_number_of_applicants_from_job_post_page_when_workplace_type_is_empty(self):
+        # TODO: Implement this test
+        pass
     
 
     def test_getting_job_workplace_type_from_search_page(self):
