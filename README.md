@@ -22,6 +22,10 @@ NOTE: If you need help setting up or running the bot locally [join our Discord c
 - Install Docker
 - Run `docker-compose up --build -d`
 
+#### Run tests in a container
+
+- Run `docker-compose up --build -d test`
+
 
 ### Debug with Dev Containers in VSCode
 
