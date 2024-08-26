@@ -214,7 +214,7 @@ class Linkedin:
                 linkedinJobId=jobId.split(":")[-1],
                 title=jobTitle,
                 company=companyName,
-                workplace_type=workPlaceType))
+                workplaceType=workPlaceType))
 
         return jobsForVerification
     

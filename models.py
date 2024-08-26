@@ -18,7 +18,7 @@ class JobForVerification:
     linkedinJobId: str
     title: str
     company: str
-    workplace_type: str
+    workplaceType: str
 
     def to_dict(self):
         return asdict(self)
