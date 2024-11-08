@@ -15,7 +15,9 @@ chromeProfilePath = r""
 # continent locations:["Europe", "Asia", "Australia", "NorthAmerica", "SouthAmerica", "Africa", "Australia"]
 location = ["NorthAmerica"]
 # keywords related with your job search
-keywords = ["frontend", "react", "typescript","javascript", "vue", "python", "programming", "blockchain"]
+keywords = ["data scientist", "data engineer", "ml engineer", "machine learning engineer", "machine learning scientist", "data science"]
+# job titles - ex: ["Software Engineer", "Frontend Engineer", "Marketing"]
+jobTitles = ["Data Scientist", "Data Engineer", "Machine Learning Engineer", "Artificial Intelligence Engineer", "Python Developer"]
 #job experience Level - ex:  ["Internship", "Entry level" , "Associate" , "Mid-Senior level" , "Director" , "Executive"]
 experienceLevels = [ "Entry level" ]
 #job posted date - ex: ["Any Time", "Past Month" , "Past Week" , "Past 24 hours"] - select only one
@@ -29,13 +31,13 @@ salary = [ "$80,000+"]
 #sort - ex:["Recent"] or ["Relevent"] - select only one
 sort = ["Recent"]
 #Blacklist companies you dont want to apply - ex: ["Apple","Google"]
-blacklistCompanies = []
+blacklistCompanies = ["Crossover", "Jobot", "EPAM Anywhere", "BairesDev"]
 #Blaclist keywords in title - ex:["manager", ".Net"]
 blackListTitles = []
 #Follow companies after sucessfull application True - yes, False - no
 followCompanies = False
 # One keyword which is unique to one of your CV's. This is used to select the correct CV. ex: ["Android"]
-distinctCVKeyword = ["Web"]
+distinctCVKeyword = ["Scientist"]
 
  # Testing & Debugging features
 displayWarnings = False
