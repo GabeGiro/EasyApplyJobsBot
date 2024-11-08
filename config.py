@@ -40,4 +40,4 @@ followCompanies = False
 distinctCVKeyword = ["Scientist"]
 
  # Testing & Debugging features
-displayWarnings = False
+displayWarnings = True
