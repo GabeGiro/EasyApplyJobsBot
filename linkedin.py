@@ -485,18 +485,21 @@ class Linkedin:
         
 
     def handleSubmitPage(self, jobPage, jobProperties: models.Job, jobCounter: models.JobCounter):
-        followCompany = self.driver.find_element(By.CSS_SELECTOR,"label[for='follow-company-checkbox']")
-        # Use JavaScript to check the state of the checkbox
-        is_followCompany_checked = self.driver.execute_script("""
-            var label = arguments[0];
-            var checkbox = document.getElementById('follow-company-checkbox');
-            var style = window.getComputedStyle(label, '::after');
-            var content = style.getPropertyValue('content');
-            // Check if content is not 'none' or empty which may indicate the presence of the ::after pseudo-element
-            return checkbox.checked || (content && content !== 'none' && content !== '');
-        """, followCompany)
-        if config.followCompanies != is_followCompany_checked:
-            utils.interact(lambda : self.click_button(followCompany))
+        try:
+            followCompany = self.driver.find_element(By.CSS_SELECTOR,"label[for='follow-company-checkbox']")
+            # Use JavaScript to check the state of the checkbox
+            is_followCompany_checked = self.driver.execute_script("""
+                var label = arguments[0];
+                var checkbox = document.getElementById('follow-company-checkbox');
+                var style = window.getComputedStyle(label, '::after');
+                var content = style.getPropertyValue('content');
+                // Check if content is not 'none' or empty which may indicate the presence of the ::after pseudo-element
+                return checkbox.checked || (content && content !== 'none' && content !== '');
+            """, followCompany)
+            if config.followCompanies != is_followCompany_checked:
+                utils.interact(lambda : self.click_button(followCompany))
+        except NoSuchElementException:
+            prYellow("No follow company checkbox found, but it's ok.")
 
         if self.isReviewApplicationStepDisplayed():
             self.clickSubmitApplicationButton()
