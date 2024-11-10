@@ -37,7 +37,7 @@ NOTE: If you need help setting up or running the bot locally [join our Discord c
 
 - clone the repo `git clone https://github.com/GabeGiro/EasyApplyJobsBot`
 - Make sure Python and pip is installed
-- Install dependencies with `pip3 install -r requirements.yaml`
+- Install dependencies with `pip3 install -r requirements.txt`
 - You have 2 choices
    - SIMPLE: One config.py 
       - Enter your linkedin credentials on the beginning of config.py file
@@ -45,7 +45,7 @@ NOTE: If you need help setting up or running the bot locally [join our Discord c
       - Run `python3 runner.py`
    - MULTIPLE SEARCHES: Multiple configurations
       - Follow the steps described in 'Add your configuration' step of the 'Docker Setup' explained above
-      - Run `python3 runAllConfigs.py`
+      - Run `python3 allConfigsRunner.py`
 - Check Applied Jobs DATA .txt file is generate under /data folder
 
 
