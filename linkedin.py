@@ -454,12 +454,19 @@ class Linkedin:
             jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
             return jobCounter
         
-        percentageElement = self.driver.find_element(By.XPATH, constants.multiplePagePercentageXPATH)
-        comPercentage = percentageElement.get_attribute("value")
-        percentage = int(float(comPercentage))
-        applyPages = math.ceil(100 / percentage) - 2
-        
         try:
+            percentageElement = self.driver.find_element(By.XPATH, constants.multiplePagePercentageXPATH)
+            comPercentage = percentageElement.get_attribute("value")
+            try:
+                percentage = int(float(comPercentage))
+                if percentage <= 0:
+                    raise ValueError("Percentage must be positive")
+                applyPages = math.ceil(100 / percentage) - 2
+            except (ValueError, TypeError) as e:
+                utils.logDebugMessage(f"Error converting percentage value: {comPercentage}", utils.MessageTypes.ERROR, e)
+                jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
+                return jobCounter
+
             for _ in range(applyPages):
                 self.handleApplicationStep(jobProperties)
                 if self.isApplicationStepDisplayed():
@@ -470,7 +477,8 @@ class Linkedin:
                 self.clickReviewApplicationButton()
 
             jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
-        except:
+        except Exception as e:
+            utils.logDebugMessage("Error in handling multiple pages", utils.MessageTypes.ERROR, e)
             jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
 
         return jobCounter
