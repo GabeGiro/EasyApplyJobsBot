@@ -456,8 +456,9 @@ class Linkedin:
         
         percentageElement = self.driver.find_element(By.XPATH, constants.multiplePagePercentageXPATH)
         comPercentage = percentageElement.get_attribute("value")
-        percentage = int(comPercentage)
+        percentage = int(float(comPercentage))
         applyPages = math.ceil(100 / percentage) - 2
+        
         try:
             for _ in range(applyPages):
                 self.handleApplicationStep(jobProperties)
