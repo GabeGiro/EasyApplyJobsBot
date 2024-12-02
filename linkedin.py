@@ -454,23 +454,24 @@ class Linkedin:
             jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
             return jobCounter
         
-        percentageElement = self.driver.find_element(By.XPATH, constants.multiplePagePercentageXPATH)
+        percentageElement = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, constants.multiplePagePercentageXPATH))
+        )
+        
         comPercentage = percentageElement.get_attribute("value")
         percentage = int(comPercentage)
         applyPages = math.ceil(100 / percentage) - 2
-        try:
-            for _ in range(applyPages):
-                self.handleApplicationStep(jobProperties)
-                if self.isApplicationStepDisplayed():
-                    self.clickNextButton()
 
+        for _ in range(applyPages):
             self.handleApplicationStep(jobProperties)
-            if self.isLastApplicationStepDisplayed():
-                self.clickReviewApplicationButton()
+            if self.isApplicationStepDisplayed():
+                self.clickNextButton()
 
-            jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
-        except:
-            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
+        self.handleApplicationStep(jobProperties)
+        if self.isLastApplicationStepDisplayed():
+            self.clickReviewApplicationButton()
+
+        jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
 
         return jobCounter
     
