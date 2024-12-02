@@ -1,5 +1,5 @@
 import math
-from typing import List
+from typing import List, Optional
 
 import config
 import constants
@@ -161,74 +161,141 @@ class Linkedin:
     
     
     def getJobsFromSearchPage(self) -> List[models.JobForVerification]:
-        jobsListItems = self.driver.find_elements(By.XPATH,'//li[@data-occludable-job-id]')
+        """Get all jobs from the search results page with improved error handling"""
+        jobsListItems = self.driver.find_elements(By.XPATH, '//li[@data-occludable-job-id]')
         jobsForVerification = []
 
         for jobItem in jobsListItems:
-            companyName = None
-            jobTitle = None
-            workPlaceType = None
+            try:
+                if self.exists(jobItem, By.XPATH, ".//*[contains(text(), 'Applied')]"):
+                    if config.displayWarnings:
+                        prYellow("⚠️  Not adding a job as I already applied to this job")
+                    continue
 
-            if self.exists(jobItem, By.XPATH, ".//*[contains(text(), 'Applied')]"):
-                if config.displayWarnings:
-                    prYellow("⚠️  Not adding a job as I already applied to this job")
-                continue
+                jobTitle = self.getJobTitleFromJobCard(jobItem)
+                if not jobTitle:
+                    if config.displayWarnings:
+                        prYellow("⚠️  Couldn't extract job title from job card")
+                    continue
 
-            # TODO Fix when some jobItems don't contain companyNameSpan which is not an expected behavior
-            companyNameSpan = jobItem.find_elements(By.XPATH, ".//span[contains(@class, 'job-card-container__primary-description')]")
-            if companyNameSpan:
-                full_description = companyNameSpan[0].text.strip()
-                
-                textWithinParentheses = utils.extractTextWithinParentheses(full_description)
-                workPlaceType = self.verifyWorkPlaceType(textWithinParentheses)
+                if self.isTitleBlacklisted(jobTitle):
+                    if config.displayWarnings:
+                        prYellow(f"⚠️  Not adding a job as the title '{jobTitle}' is blacklisted")
+                    continue
 
-                if '·' in full_description:
-                    companyName = full_description.split('·')[0].strip()
-                else:
-                    companyName = full_description
+                companyName = self.getCompanyNameFromJobCard(jobItem)
+                if not companyName:
+                    if config.displayWarnings:
+                        prYellow("⚠️  Couldn't extract company name from job card")
+                    continue
 
                 if self.isCompanyBlacklisted(companyName):
                     if config.displayWarnings:
                         prYellow(f"⚠️  Not adding a job as the company '{companyName}' is blacklisted")
                     continue
 
-            if companyName is None:
-                utils.logDebugMessage("Couldn't find companyName", utils.MessageTypes.WARNING)
-                continue
-
-            jobTitleAnchor = jobItem.find_elements(By.XPATH, ".//a[contains(@class, 'job-card-container__link job-card-list__title')]")
-            if len(jobTitleAnchor) > 0:
-                allTexts = jobTitleAnchor[0].text.split("\n")
-                uniqueTexts = list(dict.fromkeys(allTexts))
-                jobTitle = uniqueTexts[0].strip()
-
-                if self.isTitleBlacklisted(jobTitle):
+                jobId = jobItem.get_attribute("data-occludable-job-id")
+                if not jobId:
                     if config.displayWarnings:
-                        prYellow(f"⚠️  Not adding a job as the title '{jobTitle}' is blacklisted")
+                        prYellow("⚠️  Couldn't extract job ID from job card")
                     continue
-            
-            if jobTitle is None:
-                utils.logDebugMessage("Couldn't find jobTitle", utils.MessageTypes.WARNING)
-                continue
-            
-            if jobTitle is None:
-                utils.logDebugMessage("Couldn't find jobTitle", utils.MessageTypes.WARNING)
-                continue
-            
-            jobId = jobItem.get_attribute("data-occludable-job-id")
 
-            if jobId is None:
-                utils.logDebugMessage("Couldn't find jobID", utils.MessageTypes.WARNING)
-                continue
+                workPlaceType = self.getWorkplaceTypeFromJobCard(jobItem)
 
-            jobsForVerification.append(models.JobForVerification(
-                linkedinJobId=jobId.split(":")[-1],
-                title=jobTitle,
-                company=companyName,
-                workplaceType=workPlaceType))
+                jobsForVerification.append(models.JobForVerification(
+                    linkedinJobId=jobId.split(":")[-1],
+                    title=jobTitle,
+                    company=companyName,
+                    workplaceType=workPlaceType))
+
+            except Exception as e:
+                if config.displayWarnings:
+                    prYellow(f"⚠️  Error processing job card: {str(e)}")
+                    prYellow(f"Job card HTML: {jobItem.get_attribute('innerHTML')[:200]}...")
+                continue
 
         return jobsForVerification
-    
+
+
+    def cleanCompanyName(self, text: str) -> str:
+        """Clean up company name by removing extra information"""
+        if not text:
+            return ""
+            
+        separators = ['·', '(', '-', '|']
+        for separator in separators:
+            if separator in text:
+                text = text.split(separator)[0]
+        
+        return text.strip()
+
+
+    def getCompanyNameFromJobCard(self, jobItem) -> Optional[str]:
+        """Extract company name from a job card using LinkedIn's current structure"""
+        try:
+            company_elements = jobItem.find_elements(By.CSS_SELECTOR, "[data-tracking-control-name='public_jobs_company_name']")
+            if company_elements and len(company_elements) > 0:
+                return self.cleanCompanyName(company_elements[0].text)
+
+            subtitle_elements = jobItem.find_elements(By.CSS_SELECTOR, "[class*='base-card__subtitle']")
+            if subtitle_elements and len(subtitle_elements) > 0:
+                return self.cleanCompanyName(subtitle_elements[0].text)
+
+            metadata_elements = jobItem.find_elements(By.CSS_SELECTOR, "[class*='job-card-container__metadata']")
+            if metadata_elements and len(metadata_elements) > 0:
+                return self.cleanCompanyName(metadata_elements[0].text)
+
+            company_name_elements = jobItem.find_elements(By.CSS_SELECTOR, "[class*='company-name']")
+            if company_name_elements and len(company_name_elements) > 0:
+                return self.cleanCompanyName(company_name_elements[0].text)
+
+            return None
+
+        except Exception as e:
+            if config.displayWarnings:
+                prYellow(f"⚠️  Error extracting company name: {str(e)}")
+            return None
+
+
+    def getJobTitleFromJobCard(self, jobItem) -> Optional[str]:
+        """Extract job title from a job card using LinkedIn's current structure"""
+        try:
+            links = jobItem.find_elements(By.CSS_SELECTOR, "a[class*='job-card-list__title']")
+            if links and len(links) > 0:
+                return links[0].text.strip()
+
+            headings = jobItem.find_elements(By.CSS_SELECTOR, "h3[class*='job-card-list__title']")
+            if headings and len(headings) > 0:
+                return headings[0].text.strip()
+
+            title_elements = jobItem.find_elements(By.CSS_SELECTOR, "[class*='base-card__title']")
+            if title_elements and len(title_elements) > 0:
+                return title_elements[0].text.strip()
+
+            all_elements = jobItem.find_elements(By.CSS_SELECTOR, "[aria-label*='job title']")
+            if all_elements and len(all_elements) > 0:
+                return all_elements[0].text.strip()
+
+            return None
+
+        except Exception as e:
+            if config.displayWarnings:
+                prYellow(f"⚠️  Error extracting job title: {str(e)}")
+            return None
+
+
+    def getWorkplaceTypeFromJobCard(self, jobItem) -> str:
+        """Extract workplace type from a job card if available"""
+        try:
+            description_span = jobItem.find_elements(By.CSS_SELECTOR, "span.job-card-container__primary-description")
+            if description_span and len(description_span) > 0:
+                text = description_span[0].text
+                workplace_type = utils.extractTextWithinParentheses(text)
+                return self.verifyWorkPlaceType(workplace_type)
+        except Exception:
+            pass
+        return ""
+
 
     # TODO Move to logger.py (after splitting utils.py)
     def getLogTextForJobProperties(self, jobProperties: models.Job, jobCounter: models.JobCounter):
