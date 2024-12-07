@@ -407,3 +407,15 @@ class LinkedinUrlGenerator:
             case "Relevent":
                 sortBy = "sortBy=R"                
         return sortBy
+
+
+def removeSeparators(text: str, separators=['·', '(', '-', '|']) -> str:
+    """Remove text after any of the specified separators and trim whitespace"""
+    if not text:
+        return ""
+        
+    for separator in separators:
+        if separator in text:
+            text = text.split(separator)[0]
+    
+    return text.strip()
