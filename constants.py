@@ -69,3 +69,14 @@ job_title_codes = {
     'Artificial Intelligence Engineer': "30128",
     'Python Developer': "25169",
 }
+
+APPLIED_TEXT_XPATH = ".//*[contains(text(), 'Applied')]"
+JOB_CARD_COMPANY_NAME_CSS = "[data-tracking-control-name='public_jobs_company_name']"
+JOB_CARD_SUBTITLE_CSS = "[class*='base-card__subtitle']"
+JOB_CARD_METADATA_CSS = "[class*='job-card-container__metadata']"
+JOB_CARD_COMPANY_CSS = "[class*='company-name']"
+JOB_CARD_TITLE_LINK_CSS = "a[class*='job-card-list__title']"
+JOB_CARD_TITLE_HEADING_CSS = "h3[class*='job-card-list__title']"
+JOB_CARD_BASE_TITLE_CSS = "[class*='base-card__title']"
+JOB_CARD_TITLE_LABEL_CSS = "[aria-label*='job title']"
+JOB_CARD_DESCRIPTION_CSS = "span.job-card-container__primary-description"
