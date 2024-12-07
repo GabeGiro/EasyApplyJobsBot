@@ -454,32 +454,37 @@ class Linkedin:
             jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
             return jobCounter
         
-        try:
-            percentageElement = self.driver.find_element(By.XPATH, constants.multiplePagePercentageXPATH)
-            comPercentage = percentageElement.get_attribute("value")
-            try:
-                percentage = int(float(comPercentage))
-                if percentage <= 0:
-                    raise ValueError("Percentage must be positive")
-                applyPages = math.ceil(100 / percentage) - 2
-            except (ValueError, TypeError) as e:
-                utils.logDebugMessage(f"Error converting percentage value: {comPercentage}", utils.MessageTypes.ERROR, e)
-                jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
-                return jobCounter
-
-            for _ in range(applyPages):
-                self.handleApplicationStep(jobProperties)
-                if self.isApplicationStepDisplayed():
-                    self.clickNextButton()
-
-            self.handleApplicationStep(jobProperties)
-            if self.isLastApplicationStepDisplayed():
-                self.clickReviewApplicationButton()
-
-            jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
-        except Exception as e:
-            utils.logDebugMessage("Error in handling multiple pages", utils.MessageTypes.ERROR, e)
+        if not self.exists(self.driver, By.XPATH, constants.multiplePagePercentageXPATH):
+            utils.logDebugMessage("Could not find percentage element", utils.MessageTypes.WARNING)
             jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
+            return jobCounter
+
+        percentageElement = self.driver.find_element(By.XPATH, constants.multiplePagePercentageXPATH)
+        comPercentage = percentageElement.get_attribute("value")
+        
+        if not comPercentage or not comPercentage.replace('.', '').isdigit():
+            utils.logDebugMessage(f"Invalid percentage value: {comPercentage}", utils.MessageTypes.ERROR)
+            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
+            return jobCounter
+
+        percentage = float(comPercentage)
+        if percentage <= 0:
+            utils.logDebugMessage("Percentage must be positive", utils.MessageTypes.ERROR)
+            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
+            return jobCounter
+
+        applyPages = math.ceil(100 / percentage) - 2
+
+        for _ in range(applyPages):
+            self.handleApplicationStep(jobProperties)
+            if self.isApplicationStepDisplayed():
+                self.clickNextButton()
+
+        self.handleApplicationStep(jobProperties)
+        if self.isLastApplicationStepDisplayed():
+            self.clickReviewApplicationButton()
+
+        jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
 
         return jobCounter
     
