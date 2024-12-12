@@ -454,22 +454,37 @@ class Linkedin:
             jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
             return jobCounter
         
-        if self.exists(self.driver, By.XPATH, constants.multiplePagePercentageXPATH):
-            percentageElement = self.driver.find_element(By.XPATH, constants.multiplePagePercentageXPATH)
-            comPercentage = percentageElement.get_attribute("value")
-            percentage = int(comPercentage)
-            applyPages = math.ceil(100 / percentage) - 2
+        if not self.exists(self.driver, By.XPATH, constants.multiplePagePercentageXPATH):
+            utils.logDebugMessage("Could not find percentage element", utils.MessageTypes.WARNING)
+            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
+            return jobCounter
 
-            for _ in range(applyPages):
-                self.handleApplicationStep(jobProperties)
-                if self.isApplicationStepDisplayed():
-                    self.clickNextButton()
+        percentageElement = self.driver.find_element(By.XPATH, constants.multiplePagePercentageXPATH)
+        comPercentage = percentageElement.get_attribute("value")
+        
+        if not comPercentage or not comPercentage.replace('.', '').isdigit():
+            utils.logDebugMessage(f"Invalid percentage value: {comPercentage}", utils.MessageTypes.ERROR)
+            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
+            return jobCounter
 
+        percentage = float(comPercentage)
+        if percentage <= 0:
+            utils.logDebugMessage("Percentage must be positive", utils.MessageTypes.ERROR)
+            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
+            return jobCounter
+
+        applyPages = math.ceil(100 / percentage) - 2
+
+        for _ in range(applyPages):
             self.handleApplicationStep(jobProperties)
-            if self.isLastApplicationStepDisplayed():
-                self.clickReviewApplicationButton()
+            if self.isApplicationStepDisplayed():
+                self.clickNextButton()
 
-            jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
+        self.handleApplicationStep(jobProperties)
+        if self.isLastApplicationStepDisplayed():
+            self.clickReviewApplicationButton()
+
+        jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
 
         return jobCounter
     
