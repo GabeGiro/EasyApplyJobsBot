@@ -407,3 +407,14 @@ class LinkedinUrlGenerator:
             case "Relevent":
                 sortBy = "sortBy=R"                
         return sortBy
+
+
+def cleanJobMetadata(text: str, separators=['·', '(', '-', '|']) -> str:
+    if not text:
+        return ""
+        
+    for separator in separators:
+        if separator in text:
+            text = text.split(separator)[0]
+    
+    return text.strip()
