@@ -99,7 +99,7 @@ class Linkedin:
                         url = url + "&start=" + str(currentSearchResultPageJobs)
                         self.goToUrl(url)
 
-                        jobsForVerification = self.getJobsFromSearchPage()
+                        jobsForVerification = self.getJobsFromSearchPageAndFilterBlacklisted()
                         verifiedJobs = repository_wrapper.verify_jobs(jobsForVerification)
 
                         for job in verifiedJobs:
@@ -160,9 +160,8 @@ class Linkedin:
         return jobCounter
     
     
-    def getJobsFromSearchPage(self) -> List[models.JobForVerification]:
-        """Get all jobs from the search results page"""
-        jobsListItems = self.driver.find_elements(By.XPATH, '//li[@data-occludable-job-id]')
+    def getJobsFromSearchPageAndFilterBlacklisted(self) -> List[models.JobForVerification]:
+        jobsListItems = self.driver.find_elements(By.CSS_SELECTOR, constants.JOB_CARD_CONTAINER_CSS)
         jobsForVerification = []
 
         for jobItem in jobsListItems:
@@ -179,7 +178,7 @@ class Linkedin:
                 utils.logDebugMessage(f"Not adding job as title '{jobTitle}' is blacklisted", MessageTypes.INFO)
                 continue
 
-            companyName = self.getCompanyNameFromJobCard(jobItem)
+            companyName = self.getCompanyNameFromJobCardInSearchResults(jobItem)
             if not companyName:
                 utils.logDebugMessage("Could not extract company name from job card", MessageTypes.WARNING)
                 continue
@@ -188,12 +187,12 @@ class Linkedin:
                 utils.logDebugMessage(f"Not adding job as company '{companyName}' is blacklisted", MessageTypes.INFO)
                 continue
 
-            jobId = jobItem.get_attribute("data-occludable-job-id")
+            jobId = jobItem.get_attribute(constants.JOB_CARD_ID_ATTRIBUTE)
             if not jobId:
                 utils.logDebugMessage("Could not extract job ID from job card", MessageTypes.WARNING)
                 continue
 
-            workPlaceType = self.getWorkplaceTypeFromJobCard(jobItem)
+            workPlaceType = self.getWorkplaceTypeFromJobCardIfAvailable(jobItem)
 
             jobsForVerification.append(models.JobForVerification(
                 linkedinJobId=jobId.split(":")[-1],
@@ -204,8 +203,7 @@ class Linkedin:
         return jobsForVerification
 
 
-    def getCompanyNameFromJobCard(self, jobItem) -> Optional[str]:
-        """Extract company name from a job card using LinkedIn's current structure"""
+    def getCompanyNameFromJobCardInSearchResults(self, jobItem) -> Optional[str]:
         selectors = [
             constants.JOB_CARD_COMPANY_NAME_CSS,
             constants.JOB_CARD_SUBTITLE_CSS, 
@@ -222,7 +220,6 @@ class Linkedin:
 
 
     def getJobTitleFromJobCard(self, jobItem) -> Optional[str]:
-        """Extract job title from a job card using LinkedIn's current structure"""
         selectors = [
             constants.JOB_CARD_TITLE_LINK_CSS,
             constants.JOB_CARD_TITLE_HEADING_CSS,
@@ -238,8 +235,7 @@ class Linkedin:
         return None
 
 
-    def getWorkplaceTypeFromJobCard(self, jobItem) -> str:
-        """Extract workplace type from a job card if available"""
+    def getWorkplaceTypeFromJobCardIfAvailable(self, jobItem) -> str:
         description_spans = jobItem.find_elements(By.CSS_SELECTOR, constants.JOB_CARD_DESCRIPTION_CSS)
         if description_spans and len(description_spans) > 0:
             text = description_spans[0].text

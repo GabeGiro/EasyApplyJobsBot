@@ -409,8 +409,7 @@ class LinkedinUrlGenerator:
         return sortBy
 
 
-def removeSeparators(text: str, separators=['·', '(', '-', '|']) -> str:
-    """Remove text after any of the specified separators and trim whitespace"""
+def cleanJobMetadata(text: str, separators=['·', '(', '-', '|']) -> str:
     if not text:
         return ""
         
