@@ -409,7 +409,7 @@ class LinkedinUrlGenerator:
         return sortBy
 
 
-def cleanJobMetadata(text: str, separators=['·', '(', '-', '|']) -> str:
+def getFirstStringBeforeSeparators(text: str, separators=['·', '(', '-', '|']) -> str:
     if not text:
         return ""
         

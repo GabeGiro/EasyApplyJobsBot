@@ -161,11 +161,11 @@ class Linkedin:
     
     
     def getJobsFromSearchPageAndFilterBlacklisted(self) -> List[models.JobForVerification]:
-        jobsListItems = self.driver.find_elements(By.CSS_SELECTOR, constants.JOB_CARD_CONTAINER_CSS)
+        jobsListItems = self.driver.find_elements(By.CSS_SELECTOR, constants.jobCardContainerCSS)
         jobsForVerification = []
 
         for jobItem in jobsListItems:
-            if self.exists(jobItem, By.XPATH, constants.APPLIED_TEXT_XPATH):
+            if self.exists(jobItem, By.XPATH, constants.appliedTextXPATH):
                 utils.logDebugMessage("Not adding a job as already applied", MessageTypes.INFO)
                 continue
 
@@ -187,7 +187,7 @@ class Linkedin:
                 utils.logDebugMessage(f"Not adding job as company '{companyName}' is blacklisted", MessageTypes.INFO)
                 continue
 
-            jobId = jobItem.get_attribute(constants.JOB_CARD_ID_ATTRIBUTE)
+            jobId = jobItem.get_attribute(constants.jobCardIdAttribute)
             if not jobId:
                 utils.logDebugMessage("Could not extract job ID from job card", MessageTypes.WARNING)
                 continue
@@ -205,26 +205,26 @@ class Linkedin:
 
     def getCompanyNameFromJobCardInSearchResults(self, jobItem) -> Optional[str]:
         selectors = [
-            constants.JOB_CARD_COMPANY_NAME_CSS,
-            constants.JOB_CARD_SUBTITLE_CSS, 
-            constants.JOB_CARD_METADATA_CSS,
-            constants.JOB_CARD_COMPANY_CSS
+            constants.jobCardCompanyNameCSS,
+            constants.jobCardSubtitleCSS, 
+            constants.jobCardMetadataCSS,
+            constants.jobCardCompanyCSS
         ]
         
         for selector in selectors:
             elements = jobItem.find_elements(By.CSS_SELECTOR, selector)
             if elements and len(elements) > 0:
-                return utils.removeSeparators(elements[0].text)
+                return utils.getFirstStringBeforeSeparators(elements[0].text)
             
         return None
 
 
     def getJobTitleFromJobCard(self, jobItem) -> Optional[str]:
         selectors = [
-            constants.JOB_CARD_TITLE_LINK_CSS,
-            constants.JOB_CARD_TITLE_HEADING_CSS,
-            constants.JOB_CARD_BASE_TITLE_CSS,
-            constants.JOB_CARD_TITLE_LABEL_CSS
+            constants.jobCardTitleLinkCSS,
+            constants.jobCardTitleHeadingCSS,
+            constants.jobCardBaseTitleCSS,
+            constants.jobCardTitleLabelCSS
         ]
         
         for selector in selectors:
@@ -236,7 +236,7 @@ class Linkedin:
 
 
     def getWorkplaceTypeFromJobCardIfAvailable(self, jobItem) -> str:
-        description_spans = jobItem.find_elements(By.CSS_SELECTOR, constants.JOB_CARD_DESCRIPTION_CSS)
+        description_spans = jobItem.find_elements(By.CSS_SELECTOR, constants.jobCardDescriptionCSS)
         if description_spans and len(description_spans) > 0:
             text = description_spans[0].text
             workplace_type = utils.extractTextWithinParentheses(text)
