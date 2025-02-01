@@ -468,6 +468,7 @@ class Linkedin:
             jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
             return jobCounter
         
+        # TODO Extract percentage logic to a separate method
         if not self.exists(self.driver, By.XPATH, constants.multiplePagePercentageXPATH):
             utils.logDebugMessage("Could not find percentage element", utils.MessageTypes.WARNING)
             jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
