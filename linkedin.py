@@ -99,7 +99,7 @@ class Linkedin:
                         url = url + "&start=" + str(currentSearchResultPageJobs)
                         self.goToUrl(url)
 
-                        jobsForVerification = self.getJobsFromSearchPageAndFilterBlacklisted()
+                        jobsForVerification = self.getJobsFromSearchPage()
                         verifiedJobs = repository_wrapper.verify_jobs(jobsForVerification)
 
                         for job in verifiedJobs:
@@ -160,7 +160,7 @@ class Linkedin:
         return jobCounter
     
     
-    def getJobsFromSearchPageAndFilterBlacklisted(self) -> List[models.JobForVerification]:
+    def getJobsFromSearchPage(self) -> List[models.JobForVerification]:
         jobsListItems = self.driver.find_elements(By.CSS_SELECTOR, constants.jobCardContainerCSS)
         jobsForVerification = []
 
