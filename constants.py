@@ -42,6 +42,7 @@ nextPageButtonCSS = "button[aria-label='Continue to next step']"
 reviewApplicationButtonCSS = "button[aria-label*='Review']"
 submitApplicationButtonCSS = "button[aria-label='Submit application']"
 errorMessageForNecessaryFiledCSS = "div.artdeco-inline-feedback.artdeco-inline-feedback--error[data-test-form-element-error-messages]"
+followCheckboxCSS = "label[for='follow-company-checkbox']"
 
 
 # TO DO ADD OTHER PRINT CONSTANTS

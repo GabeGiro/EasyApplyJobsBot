@@ -490,6 +490,7 @@ class Linkedin:
 
         applyPages = math.ceil(100 / percentage) - 2
 
+        # TODO Make sure to check if the percentage is changed after each clickNextButton (TDD)
         for _ in range(applyPages):
             self.handleApplicationStep(jobProperties)
             if self.isApplicationStepDisplayed():
@@ -514,7 +515,7 @@ class Linkedin:
         
 
     def handleSubmitPage(self, jobPage, jobProperties: models.Job, jobCounter: models.JobCounter):
-        followCompany = self.driver.find_element(By.CSS_SELECTOR,"label[for='follow-company-checkbox']")
+        followCompany = self.driver.find_element(By.CSS_SELECTOR, constants.followCheckboxCSS)
         # Use JavaScript to check the state of the checkbox
         is_followCompany_checked = self.driver.execute_script("""
             var label = arguments[0];
