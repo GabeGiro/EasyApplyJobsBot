@@ -418,3 +418,7 @@ def getFirstStringBeforeSeparators(text: str, separators=['·', '(', '-', '|']) 
             text = text.split(separator)[0]
     
     return text.strip()
+
+
+def progressMatchesExpectedApplicationPage(step: int, numberOfSteps, progress: float):
+    return math.isclose(progress, (step / numberOfSteps) * 100, rel_tol=0.001) # TODO Try without is close, but just equals

@@ -150,12 +150,12 @@ class Linkedin:
             jobCounter.skipped_blacklisted += 1
             lineToWrite = self.getLogTextForJobProperties(jobProperties, jobCounter) + " | " + "* 🤬 Blacklisted Job, skipped!: " + str(jobPage)
             self.displayWriteResults(lineToWrite)
+            return jobCounter
 
-        else:        
-            jobCounter = self.handleJobPost(
-                jobPage=jobPage, 
-                jobProperties=jobProperties, 
-                jobCounter=jobCounter)
+        jobCounter = self.handleJobPost(
+            jobPage=jobPage, 
+            jobProperties=jobProperties, 
+            jobCounter=jobCounter)
 
         return jobCounter
     
@@ -254,20 +254,22 @@ class Linkedin:
         
 
     def handleJobPost(self, jobPage, jobProperties: models.Job, jobCounter: models.JobCounter):
-        if self.isEasyApplyButtonDisplayed():
-            self.clickEasyApplyButton()
-            
-            if self.isApplicationPopupDisplayed():
-                # Now, the easy apply popup should be open
-                if self.exists(self.driver, By.CSS_SELECTOR, constants.submitApplicationButtonCSS):
-                    jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
-                elif self.exists(self.driver, By.CSS_SELECTOR, constants.nextPageButtonCSS):
-                    jobCounter = self.handleMultiplePages(jobPage, jobProperties, jobCounter)
-
-        else:
+        if not self.isEasyApplyButtonDisplayed():
             jobCounter.skipped_already_applied += 1
             lineToWrite = self.getLogTextForJobProperties(jobProperties, jobCounter) + " | " + "* 🥳 Already applied! Job: " + str(jobPage)
             self.displayWriteResults(lineToWrite)
+            return jobCounter
+        
+        self.clickEasyApplyButton()
+        
+        if not self.isApplicationPopupDisplayed():
+            return jobCounter
+        
+        # Now, the easy apply popup should be open
+        if self.isSubmitButtonDisplayed():
+            jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
+        elif self.isNextButtonDisplayed():
+            jobCounter = self.handleMultiplePages(jobPage, jobProperties, jobCounter)
 
         return jobCounter
     
@@ -459,6 +461,25 @@ class Linkedin:
     def isTitleBlacklisted(self, title: str):
         return any(blacklistedTitle.strip().lower() in title.lower() for blacklistedTitle in config.blackListTitles)
 
+
+    def extract_percentage(self):
+        if not self.exists(self.driver, By.XPATH, constants.multiplePagePercentageXPATH):
+            utils.logDebugMessage("Could not find percentage element", utils.MessageTypes.WARNING)
+            return None
+
+        percentageElement = self.driver.find_element(By.XPATH, constants.multiplePagePercentageXPATH)
+        comPercentage = percentageElement.get_attribute("value")
+        
+        if not comPercentage or not comPercentage.replace('.', '').isdigit():
+            utils.logDebugMessage(f"Invalid percentage value: {comPercentage}", utils.MessageTypes.ERROR)
+            return None
+
+        percentage = float(comPercentage)
+        if percentage <= 0:
+            utils.logDebugMessage("Percentage must be positive", utils.MessageTypes.ERROR)
+            return None
+        
+        return percentage
     
     def handleMultiplePages(self, jobPage, jobProperties: models.Job, jobCounter: models.JobCounter):
         self.clickNextButton()
@@ -468,33 +489,21 @@ class Linkedin:
             jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
             return jobCounter
         
-        # TODO Extract percentage logic to a separate method
-        if not self.exists(self.driver, By.XPATH, constants.multiplePagePercentageXPATH):
-            utils.logDebugMessage("Could not find percentage element", utils.MessageTypes.WARNING)
+        percentage = self.extract_percentage()
+        if percentage is None:
             jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
             return jobCounter
-
-        percentageElement = self.driver.find_element(By.XPATH, constants.multiplePagePercentageXPATH)
-        comPercentage = percentageElement.get_attribute("value")
         
-        if not comPercentage or not comPercentage.replace('.', '').isdigit():
-            utils.logDebugMessage(f"Invalid percentage value: {comPercentage}", utils.MessageTypes.ERROR)
-            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
-            return jobCounter
+        totalApplicationPages = math.ceil(100 / percentage)
 
-        percentage = float(comPercentage)
-        if percentage <= 0:
-            utils.logDebugMessage("Percentage must be positive", utils.MessageTypes.ERROR)
-            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
-            return jobCounter
-
-        applyPages = math.ceil(100 / percentage) - 2
-
-        # TODO Make sure to check if the percentage is changed after each clickNextButton (TDD)
-        for _ in range(applyPages):
+        for step in range(constants.numberOfDefaultPagesInApplication, totalApplicationPages):
             self.handleApplicationStep(jobProperties)
             if self.isApplicationStepDisplayed():
                 self.clickNextButton()
+            percentage = self.extract_percentage()
+            if (not utils.progressMatchesExpectedApplicationPage(step, totalApplicationPages, percentage)):
+                jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
+                return jobCounter
 
         self.handleApplicationStep(jobProperties)
         if self.isLastApplicationStepDisplayed():
@@ -621,6 +630,10 @@ class Linkedin:
         return self.exists(self.driver, By.CSS_SELECTOR, constants.nextPageButtonCSS)
     
 
+    def isNextButtonDisplayed(self):
+        return self.exists(self.driver, By.CSS_SELECTOR, constants.nextPageButtonCSS)
+    
+
     def clickNextButton(self):
         button = self.driver.find_element(By.CSS_SELECTOR, constants.nextPageButtonCSS)
         utils.interact(lambda : self.click_button(button))
@@ -636,6 +649,10 @@ class Linkedin:
     
 
     def isReviewApplicationStepDisplayed(self):
+        return self.exists(self.driver, By.CSS_SELECTOR, constants.submitApplicationButtonCSS)
+    
+
+    def isSubmitButtonDisplayed(self):
         return self.exists(self.driver, By.CSS_SELECTOR, constants.submitApplicationButtonCSS)
     
 

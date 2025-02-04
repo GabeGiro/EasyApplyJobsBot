@@ -22,6 +22,8 @@ batchSize = 10
 botSleepInBetweenSearchesBottom = 60
 botSleepInBetweenSearchesTop = 180
 
+numberOfDefaultPagesInApplication = 2
+
 
 # Webdriver Elements 
 jobsPageUrl = "https://www.linkedin.com/jobs"
