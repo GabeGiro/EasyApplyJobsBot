@@ -2,9 +2,7 @@ import math
 import os
 import random
 import time
-import traceback
 import re
-from enum import Enum
 from typing import List
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
@@ -40,49 +38,6 @@ def chromeBrowserOptions():
     return options
 
 
-def prRed(prt):
-    print(f"\033[91m{prt}\033[00m")
-
-
-def prGreen(prt):
-    print(f"\033[92m{prt}\033[00m")
-
-
-def prYellow(prt):
-    print(f"\033[93m{prt}\033[00m")
-
-
-def prBlue(prt):
-    print(f"\033[94m{prt}\033[00m")
-
-
-class MessageTypes(Enum):
-    INFO = 1
-    WARNING = 2
-    ERROR = 3
-    SUCCESS = 4
-
-
-def printInfoMes(bot:str):
-    prYellow("ℹ️ " +bot+ " is starting soon... ")
-
-
-def logDebugMessage(message, messageType=MessageTypes.INFO, exception=Exception(), displayTraceback = False):
-    if (config.displayWarnings):
-        match messageType:
-            case MessageTypes.INFO:
-                prBlue(f"ℹ️ {message}")
-            case MessageTypes.WARNING:
-                prYellow(f"⚠️ Warning ⚠️ {message}: {str(exception)[0:100]}")
-            case MessageTypes.ERROR:
-                prRed(f"❌ Error ❌ {message}: {str(exception)[0:100]}")
-            case MessageTypes.SUCCESS:
-                prGreen(f"✅ {message}")
-
-        if (displayTraceback):
-            traceback.print_exc()
-
-
 def jobsToPages(numOfJobs: str) -> int:
   number_of_pages = 1
 
@@ -105,62 +60,6 @@ def urlToKeywords(url: str) -> List[str]:
     locationUrl = url[url.index("location=")+9:]
     location = locationUrl[0:locationUrl.index("&") ] 
     return [keyword,location]
-
-
-def writeResults(text: str):
-    timeStr = time.strftime("%Y%m%d")
-    directory = "data"
-    fileName = "Applied Jobs DATA - " + timeStr + ".txt"
-    filePath = os.path.join(directory, fileName)
-
-    try:
-        os.makedirs(directory, exist_ok=True)  # Ensure the 'data' directory exists.
-
-        # Open the file for reading and writing ('r+' opens the file for both)
-        with open(filePath, 'r+', encoding="utf-8") as file:
-            lines = []
-            for line in file:
-                if "----" not in line:
-                    lines.append(line)
-            file.seek(0)  # Go back to the start of the file
-            file.truncate()  # Clear the file
-            file.write("---- Applied Jobs Data ---- created at: " + timeStr + "\n")
-            file.write("---- Number | Job Title | Company | Location | Work Place | Posted Date | Applications | Result " + "\n")
-            for line in lines:
-                file.write(line)
-            file.write(text + "\n")
-    except FileNotFoundError:
-        with open(filePath, 'w', encoding="utf-8") as f:
-            f.write("---- Applied Jobs Data ---- created at: " + timeStr + "\n")
-            f.write("---- Number | Job Title | Company | Location | Work Place | Posted Date | Applications | Result " + "\n")
-            f.write(text + "\n")
-    except Exception as e:
-        prRed(f"❌ Error in writeResults: {e}")  # Assuming prRed is a function to print errors in red color
-
-
-# def writeResults(text: str):
-#     timeStr = time.strftime("%Y%m%d")
-#     fileName = "Applied Jobs DATA - " +timeStr + ".txt"
-#     try:
-#         with open("data/" +fileName, encoding="utf-8" ) as file:
-#             lines = []
-#             for line in file:
-#                 if "----" not in line:
-#                     lines.append(line)
-                
-#         with open("data/" +fileName, 'w' ,encoding="utf-8") as f:
-#             f.write("---- Applied Jobs Data ---- created at: " +timeStr+ "\n" )
-#             f.write("---- Number | Job Title | Company | Location | Work Place | Posted Date | Applications | Result "   +"\n" )
-#             for line in lines: 
-#                 f.write(line)
-#             f.write(text+ "\n")
-            
-#     except:
-#         with open("data/" +fileName, 'w', encoding="utf-8") as f:
-#             f.write("---- Applied Jobs Data ---- created at: " +timeStr+ "\n" )
-#             f.write("---- Number | Job Title | Company | Location | Work Place | Posted Date | Applications | Result "   +"\n" )
-
-#             f.write(text+ "\n")
 
 
 def interact(action):
