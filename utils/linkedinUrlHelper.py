@@ -1,18 +1,23 @@
+from typing import List
+
 import config
 import constants
 
 
-# class LinkedinUrlGenerator:
-
-
-@staticmethod
 def getGeneralSearchUrl():
     return constants.searchJobsUrl
 
 
-@staticmethod
 def getEasyApplySearchUrl():
     return constants.searchEasyApplyJobsUrl
+
+
+def urlToKeywords(url: str) -> List[str]:
+    keywordUrl = url[url.index("keywords=") + 9:]
+    keyword = keywordUrl[0 : keywordUrl.index("&")] 
+    locationUrl = url[url.index("location=") + 9:]
+    location = locationUrl[0 : locationUrl.index("&")] 
+    return [keyword, location]
 
 
 def generateSearchUrls():
