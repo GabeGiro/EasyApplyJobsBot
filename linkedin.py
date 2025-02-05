@@ -1,5 +1,13 @@
-import math
 from typing import List, Optional
+import re
+
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
 import config
 import constants
@@ -10,14 +18,7 @@ import utils.file as resultFileWriter
 import utils.linkedinUrlGenerator as linkedinUrlGenerator
 import utils.logger as logger
 from utils.logger import MessageTypes
-import re
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.chrome import ChromeDriverManager
+import utils.sleeper as sleeper
 
 
 # This class is responsible for handling the LinkedIn job application process
@@ -56,9 +57,9 @@ class Linkedin:
 
             logger.logDebugMessage("🔄 Trying to log in linkedin...", MessageTypes.WARNING)
             try:    
-                utils.interact(lambda : self.driver.find_element("id", "username").send_keys(config.email))
-                utils.interact(lambda : self.driver.find_element("id", "password").send_keys(config.password))
-                utils.interact(lambda : self.driver.find_element("xpath",'//button[@type="submit"]').click())
+                sleeper.interact(lambda : self.driver.find_element("id", "username").send_keys(config.email))
+                sleeper.interact(lambda : self.driver.find_element("id", "password").send_keys(config.password))
+                sleeper.interact(lambda : self.driver.find_element("xpath",'//button[@type="submit"]').click())
                 self.checkIfLoggedIn()
             except Exception as e:
                 logger.logDebugMessage("❌ Couldn't log in Linkedin by using Chrome. Please check your Linkedin credentials on config files line 7 and 8. If error continue you can define Chrome profile or run the bot on Firefox", MessageTypes.ERROR, e)
@@ -129,7 +130,7 @@ class Linkedin:
 
     
     def goToUrl(self, url: str):
-        utils.interact(lambda : self.driver.get(url))
+        sleeper.interact(lambda : self.driver.get(url))
         
 
     def goToJobPage(self, jobID: str):
@@ -141,7 +142,7 @@ class Linkedin:
     def processJob(self, jobID: str, jobCounter: models.JobCounter):
         jobPage = self.goToJobPage(jobID)
         jobCounter.total += 1
-        utils.sleepInBetweenBatches(jobCounter.total)
+        sleeper.sleepInBetweenBatches(jobCounter.total)
 
         jobProperties = self.getJobPropertiesFromJobPage(jobID)
         repository_wrapper.update_job(jobProperties)
@@ -267,7 +268,7 @@ class Linkedin:
 
     def chooseResumeIfPossible(self, jobProperties: models.Job):
         if self.isResumePage():
-            utils.interact(lambda : self.clickIfExists(By.CSS_SELECTOR, "button[aria-label='Show more resumes']"))
+            sleeper.interact(lambda : self.clickIfExists(By.CSS_SELECTOR, "button[aria-label='Show more resumes']"))
 
             # Find all CV container elements
             cv_containers = self.driver.find_elements(By.CSS_SELECTOR, ".jobs-document-upload-redesign-card__container")
@@ -279,7 +280,7 @@ class Linkedin:
                 if config.distinctCVKeyword[0] in cv_name_element.text:
                     # Check if CV is already selected
                     if 'jobs-document-upload-redesign-card__container--selected' not in container.get_attribute('class'):
-                        utils.interact(lambda : self.click_button(cv_name_element))
+                        sleeper.interact(lambda : self.click_button(cv_name_element))
 
                     # Update the backend to save the selected CV
                     repository_wrapper.attached_resume_to_job(jobProperties, cv_name_element.text)
@@ -517,7 +518,7 @@ class Linkedin:
             return checkbox.checked || (content && content !== 'none' && content !== '');
         """, followCompany)
         if config.followCompanies != is_followCompany_checked:
-            utils.interact(lambda : self.click_button(followCompany))
+            sleeper.interact(lambda : self.click_button(followCompany))
 
         if self.isReviewApplicationStepDisplayed():
             self.clickSubmitApplicationButton()
@@ -592,7 +593,7 @@ class Linkedin:
 
     def clickEasyApplyButton(self):
         button = self.driver.find_element(By.CSS_SELECTOR, constants.easyApplyButtonCSS)
-        utils.interact(lambda : self.click_button(button))
+        sleeper.interact(lambda : self.click_button(button))
 
 
     def isApplicationPopupDisplayed(self):
@@ -605,7 +606,7 @@ class Linkedin:
 
     def clickNextButton(self):
         button = self.driver.find_element(By.CSS_SELECTOR, constants.nextPageButtonCSS)
-        utils.interact(lambda : self.click_button(button))
+        sleeper.interact(lambda : self.click_button(button))
     
 
     def isLastApplicationStepDisplayed(self):
@@ -614,7 +615,7 @@ class Linkedin:
 
     def clickReviewApplicationButton(self):
         button = self.driver.find_element(By.CSS_SELECTOR, constants.reviewApplicationButtonCSS)
-        utils.interact(lambda : self.click_button(button))
+        sleeper.interact(lambda : self.click_button(button))
     
 
     def isReviewApplicationStepDisplayed(self):
@@ -627,7 +628,7 @@ class Linkedin:
 
     def clickSubmitApplicationButton(self):
         button = self.driver.find_element(By.CSS_SELECTOR, constants.submitApplicationButtonCSS)
-        utils.interact(lambda : self.click_button(button))
+        sleeper.interact(lambda : self.click_button(button))
 
 
     def find_jobs_from_search_page(self) -> list[models.JobForVerification]:

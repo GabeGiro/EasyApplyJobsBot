@@ -11,7 +11,7 @@ class MessageTypes(Enum):
     SUCCESS = 4
 
 
-def logDebugMessage(message, messageType=MessageTypes.INFO, exception=Exception(), displayTraceback = False):
+def logDebugMessage(message, messageType = MessageTypes.INFO, exception = Exception(), displayTraceback = False):
     if (config.displayWarnings):
         match messageType:
             case MessageTypes.INFO:
