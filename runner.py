@@ -1,6 +1,6 @@
 import time
 from linkedin import Linkedin
-from utils import prYellow
+from utils.utils import prYellow
 
 
 start = time.time()

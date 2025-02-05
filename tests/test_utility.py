@@ -1,5 +1,5 @@
 import unittest
-import utils
+import utils.utils as utils
 
 class TestUtility(unittest.TestCase):
     def test_progress_matches(self):
