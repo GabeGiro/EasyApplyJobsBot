@@ -216,19 +216,11 @@ class Linkedin:
 
 
     def getJobTitleFromJobCard(self, jobItem) -> Optional[str]:
-        selectors = [
-            constants.jobCardTitleLinkCSS,
-            constants.jobCardTitleHeadingCSS,
-            constants.jobCardBaseTitleCSS,
-            constants.jobCardTitleLabelCSS
-        ]
+        if (not self.exists(jobItem, By.CSS_SELECTOR, constants.jobCardTitleLinkCSS)):
+            return None
         
-        for selector in selectors:
-            elements = jobItem.find_elements(By.CSS_SELECTOR, selector)
-            if elements and len(elements) > 0:
-                return elements[0].text.strip()
-            
-        return None
+        element = jobItem.find_element(By.CSS_SELECTOR, constants.jobCardTitleLinkCSS)
+        return element.get_attribute("aria-label").strip()
 
 
     def getWorkplaceTypeFromJobCardIfAvailable(self, jobItem) -> str:

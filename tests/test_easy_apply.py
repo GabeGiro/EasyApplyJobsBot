@@ -1,4 +1,4 @@
-from base_test_class import BaseTestCase
+from tests.base_test_class import BaseTestCase
 
 from linkedin import Linkedin as JobProcessor
 from models import JobForVerification, JobCounter

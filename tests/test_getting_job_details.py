@@ -1,4 +1,4 @@
-from base_test_class import BaseTestCase
+from tests.base_test_class import BaseTestCase
 
 from linkedin import Linkedin as JobProcessor
 from models import JobForVerification
@@ -72,7 +72,7 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
         self.assertEqual(
             job_title_from_search_page, 
             job_title_from_job_page, 
-            f"The job title should be the same on job search page and job post page."
+            f"The job title should be the same on job search page and job post page. "
             f"Got {job_title_from_search_page} from search page and {job_title_from_job_page} from job post page."
         )
 
@@ -143,7 +143,7 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
         # Assert that the string contains a number
         self.assertTrue(
             any(char.isdigit() for char in job_posted_date_from_job_page), 
-            f"The posted date string should contain a digit."
+            f"The posted date string should contain a digit. "
             f"Got: {job_posted_date_from_job_page}"
         )
 
@@ -172,14 +172,14 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
         # Assert that the string contains a number
         self.assertTrue(
             any(char.isdigit() for char in number_of_applicants_from_job_page), 
-            f"The number of applicants string should contain a digit."
+            f"The number of applicants string should contain a digit. "
             f"Got: {number_of_applicants_from_job_page}"
         )
 
         # Assert that the string contains 'applicant' or 'people'
         self.assertTrue(
             "applicant" in number_of_applicants_from_job_page.lower() or "people" in number_of_applicants_from_job_page.lower(), 
-            f"The number of applicants string should contain 'applicant' or 'people'."
+            f"The number of applicants string should contain 'applicant' or 'people'. "
             f"Got: {number_of_applicants_from_job_page}"
         )
 
@@ -205,7 +205,7 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
         # Assert that the string contains a word 'remote', 'on-site' or 'hybrid' 
         self.assertTrue(
             job_workplace_type_from_search_page.lower() in ["remote", "on-site", "hybrid"], 
-            f"The workplace type should be 'remote', 'on-site' or 'hybrid'."
+            f"The workplace type should be 'remote', 'on-site' or 'hybrid'. "
             f"Got: {job_workplace_type_from_search_page}"
         )
 
@@ -241,7 +241,7 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
         self.assertEqual(
             job_workplace_type_from_search_page, 
             job_workplace_type_from_job_page, 
-            f"The workplace type should be the same on job search page and job post page."
+            f"The workplace type should be the same on job search page and job post page. "
             f"Got {job_workplace_type_from_search_page} from search page and {job_workplace_type_from_job_page} from job post page."
         )
 
@@ -268,6 +268,6 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
         # Assert that the string contains multiple lines
         self.assertTrue(
             "\n" in job_description_from_job_page, 
-            f"The job description should contain multiple lines."
+            f"The job description should contain multiple lines. "
             f"Got: {job_description_from_job_page}"
         )
