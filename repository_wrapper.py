@@ -1,4 +1,4 @@
-import utils, models
+import utils.utils as utils, models
 from typing import List
 from dotenv import load_dotenv
 

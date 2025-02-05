@@ -5,7 +5,8 @@ import config
 import constants
 import models
 import repository_wrapper
-import utils
+import utils.utils as utils
+import utils.linkedinUrlGenerator as linkedinUrlGenerator
 import re
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -13,7 +14,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from utils import prGreen, prRed, prYellow, MessageTypes
+from utils.utils import prGreen, prRed, prYellow, MessageTypes
 from webdriver_manager.chrome import ChromeDriverManager
 
 
@@ -75,7 +76,7 @@ class Linkedin:
         try:
             jobCounter = models.JobCounter()
 
-            urlData = utils.LinkedinUrlGenerator().generateSearchUrls()
+            urlData = linkedinUrlGenerator.generateSearchUrls()
 
             for url in urlData:        
                 self.goToUrl(url)
@@ -116,12 +117,12 @@ class Linkedin:
 
 
     def goToJobsSearchPage(self):
-        searchUrl = utils.LinkedinUrlGenerator.getGeneralSearchUrl()
+        searchUrl = linkedinUrlGenerator.getGeneralSearchUrl()
         self.goToUrl(searchUrl)
 
 
     def goToEasyApplyJobsSearchPage(self):
-        searchUrl = utils.LinkedinUrlGenerator.getEasyApplySearchUrl()
+        searchUrl = linkedinUrlGenerator.getEasyApplySearchUrl()
         self.goToUrl(searchUrl)
 
     
