@@ -7,7 +7,7 @@ from typing import List
 
 class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
 
-    job_with_unanswered_questions: JobForVerification
+    job_with_unanswered_questions: JobForVerification = None
 
     @classmethod
     def setUpClass(cls):
@@ -16,6 +16,7 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
 
         # Get the jobs from the search page
         easy_apply_jobs_from_search_page = cls.find_easy_apply_jobs_from_search_page()
+        cls.job_with_unanswered_questions = cls.find_job_with_unanswered_questions(easy_apply_jobs_from_search_page)
 
 
     # TODO extract and use this method in linkedin.py
@@ -33,17 +34,27 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
     def find_job_with_unanswered_questions(cls, jobs: list[JobForVerification]) -> JobForVerification:
         for job in jobs:
             cls.processor.goToJobPage(job.linkedinJobId)
-            cls.processor.clickEasyApplyButton()
-            is_application_popup_displayed = cls.processor.isApplicationPopupDisplayed()
-            cls.assertTrue(is_application_popup_displayed, "Application popup is not displayed")
-            job_that_has_pages_with_questions = cls.processor.isNextButtonDisplayed()
-            if not job_that_has_pages_with_questions:
+
+            is_easy_apply_button_displayed = cls.processor.isEasyApplyButtonDisplayed()
+            if not is_easy_apply_button_displayed:
                 continue
 
-            cls.assertTrue(job_that_has_pages_with_questions, "Job does not have pages with questions")
-            cls.processor.clickNextButton()
-            # TODO Finish this method
+            cls.processor.clickEasyApplyButton()
 
+            is_application_popup_displayed = cls.processor.isApplicationPopupDisplayed()
+            if not is_application_popup_displayed:
+                continue
+
+            while cls.processor.isNextButtonDisplayed():
+                cls.processor.clickNextButton()
+                if cls.processor.isQuestionsUnansweredErrorMessageDisplayed():
+                    return job
+                
+            if cls.processor.isLastApplicationStepDisplayed():
+                cls.processor.clickReviewApplicationButton()
+
+            if cls.processor.isQuestionsUnansweredErrorMessageDisplayed():
+                    return job
 
 
     def setUp(self):
@@ -56,38 +67,17 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
 
     # TODO test_gracefully_canceling_job_application_without_answers
     def test_gracefully_canceling_job_application_without_answers(self):
-        # Go to the first job
-        easy_apply_job = self.easy_apply_jobs_from_search_page[0]
-        self.processor.goToJobPage(easy_apply_job.linkedinJobId)
+        # Setup
+        job_counter = JobCounter()
+        easy_apply_job = self.job_with_unanswered_questions
 
-        # Click the Easy Apply button
-        self.processor.clickEasyApplyButton()
+        # When
+        self.processor.processJob(easy_apply_job.linkedinJobId, job_counter)
 
-        # Check if the application popup is displayed
-        is_application_popup_displayed = self.processor.isApplicationPopupDisplayed()
-        self.assertTrue(is_application_popup_displayed, "Application popup is not displayed")
-
-        # Click through the application process
-        while self.processor.isApplicationStepDisplayed():
-            self.processor.clickNextButton()
-
-        # Check if the Review button is displayed
-        is_last_application_step_displayed = self.processor.isLastApplicationStepDisplayed()
-        self.assertTrue(is_last_application_step_displayed, "Last application step is not displayed")
-
-        # Click the Review button
-        self.processor.clickReviewApplicationButton()
-
-        # Check if the Submit button is displayed
-        is_review_application_step_displayed = self.processor.isReviewApplicationStepDisplayed()
-        self.assertTrue(is_review_application_step_displayed, "Review application step is not displayed")
-
-        # Click the Submit button
-        self.processor.clickSubmitApplicationButton()
-
-        # Check if the application was submitted
-        is_application_submitted_dialog_displayed = self.processor.isApplicationSubmittedDialogDisplayed()
-        self.assertTrue(is_application_submitted_dialog_displayed, "Application submitted dialog is not displayed")
+        # Then
+        self.assertEqual(job_counter.total, 1)
+        self.assertEqual(job_counter.skipped_unanswered_questions, 1)
+        self.assertEqual(job_counter.applied, 0)
 
 
 # TODO Add tests:

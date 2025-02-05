@@ -165,10 +165,10 @@ def writeResults(text: str):
 
 def interact(action):
     action()
-    sleepInBetweenActions()
+    __sleepInBetweenActions()
 
 
-def sleepInBetweenActions(bottom: int = constants.botSleepInBetweenActionsBottom, top: int = constants.botSleepInBetweenActionsTop):
+def __sleepInBetweenActions(bottom: int = constants.botSleepInBetweenActionsBottom, top: int = constants.botSleepInBetweenActionsTop):
     time.sleep(random.uniform(bottom, top))
 
 

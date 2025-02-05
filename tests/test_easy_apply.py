@@ -67,7 +67,7 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
         self.assertTrue(is_application_popup_displayed, "Application popup is not displayed")
 
         # Click through the application process
-        while self.processor.isApplicationStepDisplayed():
+        while self.processor.isNextButtonDisplayed():
             self.processor.clickNextButton()
 
         # Check if Review button is displayed

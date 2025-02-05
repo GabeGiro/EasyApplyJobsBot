@@ -53,12 +53,9 @@ class Linkedin:
 
             prYellow("🔄 Trying to log in linkedin...")
             try:    
-                self.driver.find_element("id","username").send_keys(config.email)
-                utils.sleepInBetweenActions(1,2)
-                self.driver.find_element("id","password").send_keys(config.password)
-                utils.sleepInBetweenActions(1, 2)
-                self.driver.find_element("xpath",'//button[@type="submit"]').click()
-                utils.sleepInBetweenActions(3, 7)
+                utils.interact(lambda : self.driver.find_element("id", "username").send_keys(config.email))
+                utils.interact(lambda : self.driver.find_element("id", "password").send_keys(config.password))
+                utils.interact(lambda : self.driver.find_element("xpath",'//button[@type="submit"]').click())
                 self.checkIfLoggedIn()
             except:
                 prRed("❌ Couldn't log in Linkedin by using Chrome. Please check your Linkedin credentials on config files line 7 and 8. If error continue you can define Chrome profile or run the bot on Firefox")
@@ -129,8 +126,7 @@ class Linkedin:
 
     
     def goToUrl(self, url: str):
-        self.driver.get(url)
-        utils.sleepInBetweenActions()
+        utils.interact(lambda : self.driver.get(url))
         
 
     def goToJobPage(self, jobID: str):
@@ -482,32 +478,23 @@ class Linkedin:
         return percentage
     
     def handleMultiplePages(self, jobPage, jobProperties: models.Job, jobCounter: models.JobCounter):
-        self.clickNextButton()
-
-        # TODO Change the logic when answering to questions is implemented
-        if self.isErrorMessageDisplayed():
-            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
-            return jobCounter
-        
-        percentage = self.extract_percentage()
-        if percentage is None:
-            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
-            return jobCounter
-        
-        totalApplicationPages = math.ceil(100 / percentage)
-
-        for step in range(constants.numberOfDefaultPagesInApplication, totalApplicationPages):
-            self.handleApplicationStep(jobProperties)
-            if self.isApplicationStepDisplayed():
-                self.clickNextButton()
-            percentage = self.extract_percentage()
-            if (not utils.progressMatchesExpectedApplicationPage(step, totalApplicationPages, percentage)):
+        while True:
+            self.clickNextButton()
+            if self.isQuestionsUnansweredErrorMessageDisplayed():
+                # TODO Change the logic when answering to questions is implemented
                 jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
                 return jobCounter
+            self.handleApplicationStep(jobProperties)
+            if not self.isNextButtonDisplayed():
+                break
 
-        self.handleApplicationStep(jobProperties)
         if self.isLastApplicationStepDisplayed():
             self.clickReviewApplicationButton()
+
+        if self.isQuestionsUnansweredErrorMessageDisplayed():
+            # TODO Change the logic when answering to questions is implemented
+            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
+            return jobCounter
 
         jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
 
@@ -626,10 +613,6 @@ class Linkedin:
         return self.exists(self.driver, By.XPATH, constants.jobApplicationHeaderXPATH)
 
 
-    def isApplicationStepDisplayed(self):
-        return self.exists(self.driver, By.CSS_SELECTOR, constants.nextPageButtonCSS)
-    
-
     def isNextButtonDisplayed(self):
         return self.exists(self.driver, By.CSS_SELECTOR, constants.nextPageButtonCSS)
     
@@ -667,7 +650,7 @@ class Linkedin:
         return dismiss_button_present
     
 
-    def isErrorMessageDisplayed(self):
+    def isQuestionsUnansweredErrorMessageDisplayed(self):
         return self.exists(self.driver, By.CSS_SELECTOR, constants.errorMessageForNecessaryFiledCSS)
 
 
