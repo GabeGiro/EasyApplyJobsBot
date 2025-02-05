@@ -636,6 +636,12 @@ class Linkedin:
         utils.interact(lambda : self.click_button(button))
 
 
+    def find_jobs_from_search_page(self) -> list[models.JobForVerification]:
+        self.goToJobsSearchPage()
+        jobs = self.getJobsFromSearchPage()
+        return jobs
+
+
     def isApplicationSubmittedDialogDisplayed(self):
         dialog = self.driver.find_element(By.CSS_SELECTOR, "div[data-test-modal][role='dialog']")
         dismiss_button_present = self.exists(dialog, By.CSS_SELECTOR, "button[aria-label='Dismiss']")

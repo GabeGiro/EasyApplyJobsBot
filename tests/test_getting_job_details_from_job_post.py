@@ -14,17 +14,7 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
         cls.processor = JobProcessor()
 
         # Get the jobs from the search page
-        cls.jobs_from_search_page = cls.find_jobs_from_search_page()
-
-    
-    @classmethod
-    def find_jobs_from_search_page(cls) -> list[JobForVerification]:
-        # Open the Linkedin general job search page
-        cls.processor.goToJobsSearchPage()
-
-        # Get the jobs from the search page
-        jobs = cls.processor.getJobsFromSearchPage()
-        return jobs
+        cls.jobs_from_search_page = cls.processor.find_jobs_from_search_page()
 
 
     def setUp(self):
