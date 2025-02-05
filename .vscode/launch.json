@@ -41,14 +41,29 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Debug test_getting_job_details",
+            "name": "Debug test_getting_job_details_from_job_post",
             "type": "debugpy",
             "request": "launch",
             "module": "unittest",
             "args": [
                 "discover",
                 "-s", "tests", 
-                "-p", "test_getting_job_details.py" 
+                "-p", "test_getting_job_details_from_job_post.py" 
+            ],
+            "env": {
+                "PYTHONUNBUFFERED": "1",
+            },
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug test_getting_job_details_from_search_page",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "unittest",
+            "args": [
+                "discover",
+                "-s", "tests", 
+                "-p", "test_getting_job_details_from_search_page.py" 
             ],
             "env": {
                 "PYTHONUNBUFFERED": "1",
