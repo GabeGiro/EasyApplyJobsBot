@@ -53,12 +53,9 @@ class Linkedin:
 
             prYellow("🔄 Trying to log in linkedin...")
             try:    
-                self.driver.find_element("id","username").send_keys(config.email)
-                utils.sleepInBetweenActions(1,2)
-                self.driver.find_element("id","password").send_keys(config.password)
-                utils.sleepInBetweenActions(1, 2)
-                self.driver.find_element("xpath",'//button[@type="submit"]').click()
-                utils.sleepInBetweenActions(3, 7)
+                utils.interact(lambda : self.driver.find_element("id", "username").send_keys(config.email))
+                utils.interact(lambda : self.driver.find_element("id", "password").send_keys(config.password))
+                utils.interact(lambda : self.driver.find_element("xpath",'//button[@type="submit"]').click())
                 self.checkIfLoggedIn()
             except:
                 prRed("❌ Couldn't log in Linkedin by using Chrome. Please check your Linkedin credentials on config files line 7 and 8. If error continue you can define Chrome profile or run the bot on Firefox")
@@ -129,8 +126,7 @@ class Linkedin:
 
     
     def goToUrl(self, url: str):
-        self.driver.get(url)
-        utils.sleepInBetweenActions()
+        utils.interact(lambda : self.driver.get(url))
         
 
     def goToJobPage(self, jobID: str):
@@ -150,12 +146,12 @@ class Linkedin:
             jobCounter.skipped_blacklisted += 1
             lineToWrite = self.getLogTextForJobProperties(jobProperties, jobCounter) + " | " + "* 🤬 Blacklisted Job, skipped!: " + str(jobPage)
             self.displayWriteResults(lineToWrite)
+            return jobCounter
 
-        else:        
-            jobCounter = self.handleJobPost(
-                jobPage=jobPage, 
-                jobProperties=jobProperties, 
-                jobCounter=jobCounter)
+        jobCounter = self.handleJobPost(
+            jobPage=jobPage, 
+            jobProperties=jobProperties, 
+            jobCounter=jobCounter)
 
         return jobCounter
     
@@ -254,20 +250,22 @@ class Linkedin:
         
 
     def handleJobPost(self, jobPage, jobProperties: models.Job, jobCounter: models.JobCounter):
-        if self.isEasyApplyButtonDisplayed():
-            self.clickEasyApplyButton()
-            
-            if self.isApplicationPopupDisplayed():
-                # Now, the easy apply popup should be open
-                if self.exists(self.driver, By.CSS_SELECTOR, constants.submitApplicationButtonCSS):
-                    jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
-                elif self.exists(self.driver, By.CSS_SELECTOR, constants.nextPageButtonCSS):
-                    jobCounter = self.handleMultiplePages(jobPage, jobProperties, jobCounter)
-
-        else:
+        if not self.isEasyApplyButtonDisplayed():
             jobCounter.skipped_already_applied += 1
             lineToWrite = self.getLogTextForJobProperties(jobProperties, jobCounter) + " | " + "* 🥳 Already applied! Job: " + str(jobPage)
             self.displayWriteResults(lineToWrite)
+            return jobCounter
+        
+        self.clickEasyApplyButton()
+        
+        if not self.isApplicationPopupDisplayed():
+            return jobCounter
+        
+        # Now, the easy apply popup should be open
+        if self.isSubmitButtonDisplayed():
+            jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
+        elif self.isNextButtonDisplayed():
+            jobCounter = self.handleMultiplePages(jobPage, jobProperties, jobCounter)
 
         return jobCounter
     
@@ -459,45 +457,44 @@ class Linkedin:
     def isTitleBlacklisted(self, title: str):
         return any(blacklistedTitle.strip().lower() in title.lower() for blacklistedTitle in config.blackListTitles)
 
-    
-    def handleMultiplePages(self, jobPage, jobProperties: models.Job, jobCounter: models.JobCounter):
-        self.clickNextButton()
 
-        # TODO Change the logic when answering to questions is implemented
-        if self.isErrorMessageDisplayed():
-            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
-            return jobCounter
-        
-        # TODO Extract percentage logic to a separate method
+    def extract_percentage(self):
         if not self.exists(self.driver, By.XPATH, constants.multiplePagePercentageXPATH):
             utils.logDebugMessage("Could not find percentage element", utils.MessageTypes.WARNING)
-            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
-            return jobCounter
+            return None
 
         percentageElement = self.driver.find_element(By.XPATH, constants.multiplePagePercentageXPATH)
         comPercentage = percentageElement.get_attribute("value")
         
         if not comPercentage or not comPercentage.replace('.', '').isdigit():
             utils.logDebugMessage(f"Invalid percentage value: {comPercentage}", utils.MessageTypes.ERROR)
-            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
-            return jobCounter
+            return None
 
         percentage = float(comPercentage)
         if percentage <= 0:
             utils.logDebugMessage("Percentage must be positive", utils.MessageTypes.ERROR)
-            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
-            return jobCounter
-
-        applyPages = math.ceil(100 / percentage) - 2
-
-        for _ in range(applyPages):
+            return None
+        
+        return percentage
+    
+    def handleMultiplePages(self, jobPage, jobProperties: models.Job, jobCounter: models.JobCounter):
+        while True:
+            self.clickNextButton()
+            if self.isQuestionsUnansweredErrorMessageDisplayed():
+                # TODO Change the logic when answering to questions is implemented
+                jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
+                return jobCounter
             self.handleApplicationStep(jobProperties)
-            if self.isApplicationStepDisplayed():
-                self.clickNextButton()
+            if not self.isNextButtonDisplayed():
+                break
 
-        self.handleApplicationStep(jobProperties)
         if self.isLastApplicationStepDisplayed():
             self.clickReviewApplicationButton()
+
+        if self.isQuestionsUnansweredErrorMessageDisplayed():
+            # TODO Change the logic when answering to questions is implemented
+            jobCounter = self.cannotApply(jobPage, jobProperties, jobCounter)
+            return jobCounter
 
         jobCounter = self.handleSubmitPage(jobPage, jobProperties, jobCounter)
 
@@ -514,7 +511,7 @@ class Linkedin:
         
 
     def handleSubmitPage(self, jobPage, jobProperties: models.Job, jobCounter: models.JobCounter):
-        followCompany = self.driver.find_element(By.CSS_SELECTOR,"label[for='follow-company-checkbox']")
+        followCompany = self.driver.find_element(By.CSS_SELECTOR, constants.followCheckboxCSS)
         # Use JavaScript to check the state of the checkbox
         is_followCompany_checked = self.driver.execute_script("""
             var label = arguments[0];
@@ -616,7 +613,7 @@ class Linkedin:
         return self.exists(self.driver, By.XPATH, constants.jobApplicationHeaderXPATH)
 
 
-    def isApplicationStepDisplayed(self):
+    def isNextButtonDisplayed(self):
         return self.exists(self.driver, By.CSS_SELECTOR, constants.nextPageButtonCSS)
     
 
@@ -638,6 +635,10 @@ class Linkedin:
         return self.exists(self.driver, By.CSS_SELECTOR, constants.submitApplicationButtonCSS)
     
 
+    def isSubmitButtonDisplayed(self):
+        return self.exists(self.driver, By.CSS_SELECTOR, constants.submitApplicationButtonCSS)
+    
+
     def clickSubmitApplicationButton(self):
         button = self.driver.find_element(By.CSS_SELECTOR, constants.submitApplicationButtonCSS)
         utils.interact(lambda : self.click_button(button))
@@ -649,7 +650,7 @@ class Linkedin:
         return dismiss_button_present
     
 
-    def isErrorMessageDisplayed(self):
+    def isQuestionsUnansweredErrorMessageDisplayed(self):
         return self.exists(self.driver, By.CSS_SELECTOR, constants.errorMessageForNecessaryFiledCSS)
 
 

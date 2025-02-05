@@ -1,10 +1,10 @@
-import unittest
+from base_test_class import BaseTestCase
 
 from linkedin import Linkedin as JobProcessor
 from models import JobForVerification
 
 
-class test_getting_job_details_from_linkedin_job_post(unittest.TestCase):
+class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
 
     jobs_from_search_page = []
     
@@ -28,8 +28,11 @@ class test_getting_job_details_from_linkedin_job_post(unittest.TestCase):
 
 
     def setUp(self):
-        # This will be executed before each test method
-        pass
+        super().setUp()
+
+
+    def tearDown(self):
+        super().tearDown(self.processor.driver)
 
 
     def find_job_with_title(self) -> JobForVerification:    
