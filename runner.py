@@ -1,9 +1,10 @@
 import time
 from linkedin import Linkedin
-from utils.utils import prYellow
+import utils.logger as logger
+from utils.logger import MessageTypes
 
 
 start = time.time()
 Linkedin().startApplying()
 end = time.time()
-prYellow("---Took: " + str(round((time.time() - start)/60)) + " minute(s).")
+logger.logDebugMessage("---Took: " + str(round((time.time() - start)/60)) + " minute(s).")

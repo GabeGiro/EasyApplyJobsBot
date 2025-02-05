@@ -6,7 +6,10 @@ import constants
 import models
 import repository_wrapper
 import utils.utils as utils
+import utils.file as resultFileWriter
 import utils.linkedinUrlGenerator as linkedinUrlGenerator
+import utils.logger as logger
+from utils.logger import MessageTypes
 import re
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -14,7 +17,6 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from utils.utils import prGreen, prRed, prYellow, MessageTypes
 from webdriver_manager.chrome import ChromeDriverManager
 
 
@@ -35,7 +37,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 # - Handling the application of the job
 class Linkedin:
     def __init__(self):
-        prYellow("🌐 The Bot is starting.")
+        logger.logDebugMessage("🌐 The Bot is starting.", MessageTypes.WARNING)
 
         if config.chromeDriverPath != "":
             # Specify the path to Chromedriver provided by the Alpine package
@@ -52,21 +54,21 @@ class Linkedin:
         if not self.checkIfLoggedIn():
             self.goToUrl("https://www.linkedin.com/login?trk=guest_homepage-basic_nav-header-signin")
 
-            prYellow("🔄 Trying to log in linkedin...")
+            logger.logDebugMessage("🔄 Trying to log in linkedin...", MessageTypes.WARNING)
             try:    
                 utils.interact(lambda : self.driver.find_element("id", "username").send_keys(config.email))
                 utils.interact(lambda : self.driver.find_element("id", "password").send_keys(config.password))
                 utils.interact(lambda : self.driver.find_element("xpath",'//button[@type="submit"]').click())
                 self.checkIfLoggedIn()
-            except:
-                prRed("❌ Couldn't log in Linkedin by using Chrome. Please check your Linkedin credentials on config files line 7 and 8. If error continue you can define Chrome profile or run the bot on Firefox")
+            except Exception as e:
+                logger.logDebugMessage("❌ Couldn't log in Linkedin by using Chrome. Please check your Linkedin credentials on config files line 7 and 8. If error continue you can define Chrome profile or run the bot on Firefox", MessageTypes.ERROR, e)
         
         repository_wrapper.init()
     
 
     def checkIfLoggedIn(self):
         if self.exists(self.driver, By.CSS_SELECTOR, "img.global-nav__me-photo.evi-image.ember-view"):
-            prGreen("✅ Logged in Linkedin.")
+            logger.logDebugMessage("✅ Logged in Linkedin.", MessageTypes.SUCCESS)
             return True
         else:
             return False
@@ -90,7 +92,7 @@ class Linkedin:
                     totalSearchResultPages = utils.jobsToPages(totalJobs)
 
                     lineToWrite = "\n Search keyword: " + urlWords[0] + ", Location: " + urlWords[1] + ", Found " + str(totalJobs)
-                    self.displayWriteResults(lineToWrite)
+                    resultFileWriter.displayWriteResults(lineToWrite)
 
                     for searchResultPage in range(totalSearchResultPages):
                         currentSearchResultPageJobs = constants.jobsPerPage * searchResultPage
@@ -104,13 +106,13 @@ class Linkedin:
                             jobCounter = self.processJob(jobID=job.linkedinJobId, jobCounter=jobCounter)
                                     
                 except TimeoutException:
-                    prRed("0 jobs found for: " + urlWords[0] + " in " + urlWords[1])
+                    logger.logDebugMessage("0 jobs found for: " + urlWords[0] + " in " + urlWords[1], MessageTypes.ERROR)
 
-                prYellow("Category: " + urlWords[0] + " in " + urlWords[1]+ " applied: " + str(jobCounter.applied) +
-                    " jobs out of " + str(jobCounter.total) + ".")
+                logger.logDebugMessage("Category: " + urlWords[0] + " in " + urlWords[1]+ " applied: " + str(jobCounter.applied) +
+                    " jobs out of " + str(jobCounter.total) + ".", MessageTypes.SUCCESS)
 
         except Exception as e:
-            utils.logDebugMessage("Unhandled exception in startApplying", utils.MessageTypes.ERROR, e, True)
+            logger.logDebugMessage("Unhandled exception in startApplying", MessageTypes.ERROR, e, True)
             self.driver.save_screenshot("unhandled_exception.png")
             with open("page_source_at_unhandled_exception.html", "w") as file:
                 file.write(self.driver.page_source)
@@ -146,7 +148,7 @@ class Linkedin:
         if self.isJobBlacklisted(company=jobProperties.company, title=jobProperties.title): 
             jobCounter.skipped_blacklisted += 1
             lineToWrite = self.getLogTextForJobProperties(jobProperties, jobCounter) + " | " + "* 🤬 Blacklisted Job, skipped!: " + str(jobPage)
-            self.displayWriteResults(lineToWrite)
+            resultFileWriter.displayWriteResults(lineToWrite)
             return jobCounter
 
         jobCounter = self.handleJobPost(
@@ -163,30 +165,30 @@ class Linkedin:
 
         for jobItem in jobsListItems:
             if self.exists(jobItem, By.XPATH, constants.appliedTextXPATH):
-                utils.logDebugMessage("Not adding a job as already applied", MessageTypes.INFO)
+                logger.logDebugMessage("Not adding a job as already applied", MessageTypes.INFO)
                 continue
 
             jobTitle = self.getJobTitleFromJobCardInSearchResults(jobItem)
             if not jobTitle:
-                utils.logDebugMessage("Could not extract job title from job card", MessageTypes.WARNING)
+                logger.logDebugMessage("Could not extract job title from job card", MessageTypes.WARNING)
                 continue
 
             if self.isTitleBlacklisted(jobTitle):
-                utils.logDebugMessage(f"Not adding job as title '{jobTitle}' is blacklisted", MessageTypes.INFO)
+                logger.logDebugMessage(f"Not adding job as title '{jobTitle}' is blacklisted", MessageTypes.INFO)
                 continue
 
             companyName = self.getCompanyNameFromJobCardInSearchResults(jobItem)
             if not companyName:
-                utils.logDebugMessage("Could not extract company name from job card", MessageTypes.WARNING)
+                logger.logDebugMessage("Could not extract company name from job card", MessageTypes.WARNING)
                 continue
 
             if self.isCompanyBlacklisted(companyName):
-                utils.logDebugMessage(f"Not adding job as company '{companyName}' is blacklisted", MessageTypes.INFO)
+                logger.logDebugMessage(f"Not adding job as company '{companyName}' is blacklisted", MessageTypes.INFO)
                 continue
 
             jobId = jobItem.get_attribute(constants.jobCardIdAttribute)
             if not jobId:
-                utils.logDebugMessage("Could not extract job ID from job card", MessageTypes.WARNING)
+                logger.logDebugMessage("Could not extract job ID from job card", MessageTypes.WARNING)
                 continue
 
             workPlaceType = self.getWorkplaceTypeFromJobCardInSearchResults(jobItem)
@@ -246,7 +248,7 @@ class Linkedin:
         if not self.isEasyApplyButtonDisplayed():
             jobCounter.skipped_already_applied += 1
             lineToWrite = self.getLogTextForJobProperties(jobProperties, jobCounter) + " | " + "* 🥳 Already applied! Job: " + str(jobPage)
-            self.displayWriteResults(lineToWrite)
+            resultFileWriter.displayWriteResults(lineToWrite)
             return jobCounter
         
         self.clickEasyApplyButton()
@@ -307,7 +309,7 @@ class Linkedin:
             jobPostedDate = self.getJobPostedDateFromJobPage(primary_description_div)
             numberOfApplicants = self.getNumberOfApplicantsFromJobPage(primary_description_div)
         else:
-            utils.logDebugMessage("in getting primary_description_div", utils.MessageTypes.WARNING)
+            logger.logDebugMessage("in getting primary_description_div", MessageTypes.WARNING)
 
         return models.Job(
             title=jobTitle,
@@ -328,7 +330,7 @@ class Linkedin:
             jobTitleElement = self.driver.find_element(By.CSS_SELECTOR, "h1.t-24.t-bold.inline")
             jobTitle = jobTitleElement.text.strip()
         except Exception as e:
-            utils.logDebugMessage("in getting jobTitle", utils.MessageTypes.WARNING, e)
+            logger.logDebugMessage("in getting jobTitle", MessageTypes.WARNING, e)
 
         return jobTitle
     
@@ -342,7 +344,7 @@ class Linkedin:
             jobCompany = jobCompanyElement.text.strip()
             
         else:
-            utils.logDebugMessage("in getting jobCompany card", utils.MessageTypes.WARNING)
+            logger.logDebugMessage("in getting jobCompany card", MessageTypes.WARNING)
 
         return jobCompany        
     
@@ -354,7 +356,7 @@ class Linkedin:
             jobLocationSpan = primary_description_div.find_element(By.XPATH, ".//span[contains(@class, 'tvm__text--low-emphasis')][1]")
             jobLocation = jobLocationSpan.text.strip()
         except Exception as e:
-            utils.logDebugMessage("in getting jobLocation", utils.MessageTypes.WARNING, e)
+            logger.logDebugMessage("in getting jobLocation", MessageTypes.WARNING, e)
 
         return jobLocation
 
@@ -370,7 +372,7 @@ class Linkedin:
                 jobPostedDate = match.group(0)  # The whole matched text is the date
 
         except Exception as e:
-            utils.logDebugMessage("Error in getting jobPostedDate", utils.MessageTypes.WARNING, e)
+            logger.logDebugMessage("Error in getting jobPostedDate", MessageTypes.WARNING, e)
 
         return jobPostedDate
 
@@ -390,7 +392,7 @@ class Linkedin:
                     break
 
         except Exception as e:
-            utils.logDebugMessage("in getting jobApplications", utils.MessageTypes.WARNING, e)
+            logger.logDebugMessage("in getting jobApplications", MessageTypes.WARNING, e)
 
         return jobApplications
 
@@ -403,7 +405,7 @@ class Linkedin:
             firstSpanText = jobWorkPlaceTypeElement.text.strip().split('\n')[0]
             jobWorkPlaceType = self.verifyWorkPlaceType(firstSpanText)
         except Exception as e:
-            utils.logDebugMessage("in getting jobWorkPlaceType", utils.MessageTypes.WARNING, e)
+            logger.logDebugMessage("in getting jobWorkPlaceType", MessageTypes.WARNING, e)
             
         return jobWorkPlaceType
     
@@ -426,7 +428,7 @@ class Linkedin:
             descriptionContainer = self.driver.find_element(By.ID, "job-details")
             jobDescription = descriptionContainer.text  # This should get all text within, including nested spans and divs
         except Exception as e:
-            utils.logDebugMessage("in getting jobDescription: ", utils.MessageTypes.WARNING, e)
+            logger.logDebugMessage("in getting jobDescription: ", MessageTypes.WARNING, e)
 
         return jobDescription
     
@@ -453,19 +455,19 @@ class Linkedin:
 
     def extract_percentage(self):
         if not self.exists(self.driver, By.XPATH, constants.multiplePagePercentageXPATH):
-            utils.logDebugMessage("Could not find percentage element", utils.MessageTypes.WARNING)
+            logger.logDebugMessage("Could not find percentage element", MessageTypes.WARNING)
             return None
 
         percentageElement = self.driver.find_element(By.XPATH, constants.multiplePagePercentageXPATH)
         comPercentage = percentageElement.get_attribute("value")
         
         if not comPercentage or not comPercentage.replace('.', '').isdigit():
-            utils.logDebugMessage(f"Invalid percentage value: {comPercentage}", utils.MessageTypes.ERROR)
+            logger.logDebugMessage(f"Invalid percentage value: {comPercentage}", MessageTypes.ERROR)
             return None
 
         percentage = float(comPercentage)
         if percentage <= 0:
-            utils.logDebugMessage("Percentage must be positive", utils.MessageTypes.ERROR)
+            logger.logDebugMessage("Percentage must be positive", MessageTypes.ERROR)
             return None
         
         return percentage
@@ -498,7 +500,7 @@ class Linkedin:
         jobCounter.skipped_unanswered_questions += 1
         # TODO Instead of except, output which questions need to be answered
         lineToWrite = self.getLogTextForJobProperties(jobProperties, jobCounter) + " | " + "* 🥵 Couldn't apply to this job! Extra info needed. Link: " + str(jobPage)
-        self.displayWriteResults(lineToWrite)
+        resultFileWriter.displayWriteResults(lineToWrite)
 
         return jobCounter
         
@@ -522,20 +524,11 @@ class Linkedin:
             if self.isApplicationSubmittedDialogDisplayed():
                 repository_wrapper.applied_to_job(jobProperties)
                 lineToWrite = self.getLogTextForJobProperties(jobProperties, jobCounter) + " | " + "* 🥳 Just Applied to this job: " + str(jobPage)
-                self.displayWriteResults(lineToWrite)
+                resultFileWriter.displayWriteResults(lineToWrite)
 
                 jobCounter.applied += 1
 
         return jobCounter
-
-
-    # TODO Move to logger.py (after splitting utils.py)
-    def displayWriteResults(self, lineToWrite: str):
-        try:
-            prYellow(lineToWrite)
-            utils.writeResults(lineToWrite)
-        except Exception as e:
-            prRed("❌ Error in DisplayWriteResults: " + str(e))
 
 
     def handleApplicationStep(self, jobProperties: models.Job):
@@ -673,11 +666,11 @@ class Linkedin:
             # question_input.send_keys("Your answer here") then sleep
             # If no answers are found, move to the next step (backend should handle saving unanswered questions)
             if config.displayWarnings:
-                prYellow(f"The input for '{questionLabel}' is empty.")
+                logger.logDebugMessage(f"The input for '{questionLabel}' is empty.", MessageTypes.WARNING)
         else:
             # TODO Save answers to the backend if they are not already saved
             if config.displayWarnings:
-                prYellow(f"The input for '{questionLabel}' has the following value: {inputValue}")
+                logger.logDebugMessage(f"The input for '{questionLabel}' has the following value: {inputValue}", MessageTypes.WARNING)
 
 
     def handleRadioInput(self, group, questionLabel, by, value):
@@ -689,13 +682,13 @@ class Linkedin:
             # TODO Check the backend for answers. If there is an answer for this question, fill it in
             # Check or uncheck based on some condition
             # if "desired option" in label:
-            #     prYellow(f"Selecting option: {label}")
+            #     logger.logDebugMessage(f"Selecting option: {label}", MessageTypes.WARNING)
             #     radio_input.click()  # Select the radio button if it's the desired option then sleep
 
 
     def logUnhandledQuestion(self, questionLabel):
         # Log or print the unhandled question
-        prRed(f"Unhandled question: {questionLabel}")
+        logger.logDebugMessage(f"Unhandled question: {questionLabel}", MessageTypes.ERROR)
 
 
     def clickIfExists(self, by, selector):
