@@ -2,7 +2,6 @@ from tests.base_test_class import BaseTestCase
 
 from linkedin import Linkedin as JobProcessor
 from models import JobForVerification, JobCounter
-from typing import List
 
 
 class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
@@ -35,25 +34,25 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
         for job in jobs:
             cls.processor.goToJobPage(job.linkedinJobId)
 
-            is_easy_apply_button_displayed = cls.processor.isEasyApplyButtonDisplayed()
+            is_easy_apply_button_displayed = cls.processor.driverHelper.isEasyApplyButtonDisplayed()
             if not is_easy_apply_button_displayed:
                 continue
 
-            cls.processor.clickEasyApplyButton()
+            cls.processor.driverHelper.clickEasyApplyButton()
 
-            is_application_popup_displayed = cls.processor.isApplicationPopupDisplayed()
+            is_application_popup_displayed = cls.processor.driverHelper.isApplicationPopupDisplayed()
             if not is_application_popup_displayed:
                 continue
 
-            while cls.processor.isNextButtonDisplayed():
-                cls.processor.clickNextButton()
-                if cls.processor.isQuestionsUnansweredErrorMessageDisplayed():
+            while cls.processor.driverHelper.isNextButtonDisplayed():
+                cls.processor.driverHelper.clickNextButton()
+                if cls.processor.driverHelper.isQuestionsUnansweredErrorMessageDisplayed():
                     return job
                 
-            if cls.processor.isLastApplicationStepDisplayed():
-                cls.processor.clickReviewApplicationButton()
+            if cls.processor.driverHelper.isLastApplicationStepDisplayed():
+                cls.processor.driverHelper.clickReviewApplicationButton()
 
-            if cls.processor.isQuestionsUnansweredErrorMessageDisplayed():
+            if cls.processor.driverHelper.isQuestionsUnansweredErrorMessageDisplayed():
                     return job
 
 

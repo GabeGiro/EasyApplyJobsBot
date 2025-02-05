@@ -1,11 +1,7 @@
 import math
 import os
-import random
-import time
 import re
-from typing import List
 from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
 
 import config
 import constants
@@ -54,14 +50,6 @@ def jobsToPages(numOfJobs: str) -> int:
   return number_of_pages
 
 
-def urlToKeywords(url: str) -> List[str]:
-    keywordUrl = url[url.index("keywords=")+9:]
-    keyword = keywordUrl[0:keywordUrl.index("&") ] 
-    locationUrl = url[url.index("location=")+9:]
-    location = locationUrl[0:locationUrl.index("&") ] 
-    return [keyword,location]
-
-
 def extractTextWithinParentheses(text):
     # Pattern to match text within parentheses
     pattern = r"\((.*?)\)"
@@ -72,9 +60,6 @@ def extractTextWithinParentheses(text):
         return match.group(1)  # `group(1)` returns the content within the parentheses
     else:
         return ""
-
-
-
 
 
 def getFirstStringBeforeSeparators(text: str, separators=['·', '(', '-', '|']) -> str:

@@ -43,14 +43,14 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
         self.processor.goToJobPage(easy_apply_job.linkedinJobId)
 
         # Verify that Easy Apply button is displayed
-        is_easy_apply_button_displayed = self.processor.isEasyApplyButtonDisplayed()
+        is_easy_apply_button_displayed = self.processor.driverHelper.isEasyApplyButtonDisplayed()
         self.assertTrue(is_easy_apply_button_displayed, "Easy Apply button is not displayed")
 
         # Click the Easy Apply button
-        self.processor.clickEasyApplyButton()
+        self.processor.driverHelper.clickEasyApplyButton()
 
         # Check if the application popup is displayed
-        is_application_popup_displayed = self.processor.isApplicationPopupDisplayed()
+        is_application_popup_displayed = self.processor.driverHelper.isApplicationPopupDisplayed()
         self.assertTrue(is_application_popup_displayed, "Application popup is not displayed")
 
 
@@ -60,32 +60,32 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
         self.processor.goToJobPage(easy_apply_job.linkedinJobId)
 
         # Click the Easy Apply button
-        self.processor.clickEasyApplyButton()
+        self.processor.driverHelper.clickEasyApplyButton()
 
         # Check if the application popup is displayed
-        is_application_popup_displayed = self.processor.isApplicationPopupDisplayed()
+        is_application_popup_displayed = self.processor.driverHelper.isApplicationPopupDisplayed()
         self.assertTrue(is_application_popup_displayed, "Application popup is not displayed")
 
         # Click through the application process
-        while self.processor.isNextButtonDisplayed():
-            self.processor.clickNextButton()
+        while self.processor.driverHelper.isNextButtonDisplayed():
+            self.processor.driverHelper.clickNextButton()
 
         # Check if Review button is displayed
-        is_last_application_step_displayed = self.processor.isLastApplicationStepDisplayed()
+        is_last_application_step_displayed = self.processor.driverHelper.isLastApplicationStepDisplayed()
         self.assertTrue(is_last_application_step_displayed, "Last application step is not displayed")
 
         # Click the Review button
-        self.processor.clickReviewApplicationButton()
+        self.processor.driverHelper.clickReviewApplicationButton()
 
         # Check if the Submit button is displayed
-        is_review_application_step_displayed = self.processor.isReviewApplicationStepDisplayed()
+        is_review_application_step_displayed = self.processor.driverHelper.isReviewApplicationStepDisplayed()
         self.assertTrue(is_review_application_step_displayed, "Review application step is not displayed")
 
         # Click the Submit button
-        self.processor.clickSubmitApplicationButton()
+        self.processor.driverHelper.clickSubmitApplicationButton()
 
         # Check if the application was submitted
-        is_application_submitted_dialog_displayed = self.processor.isApplicationSubmittedDialogDisplayed()
+        is_application_submitted_dialog_displayed = self.processor.driverHelper.isApplicationSubmittedDialogDisplayed()
         self.assertTrue(is_application_submitted_dialog_displayed, "Application submitted dialog is not displayed")
 
 
@@ -97,7 +97,7 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
         jobCounter = self.processor.processJob(easy_apply_job.linkedinJobId, JobCounter())
 
         # Check if the application was submitted
-        is_application_submitted_dialog_displayed = self.processor.isApplicationSubmittedDialogDisplayed()
+        is_application_submitted_dialog_displayed = self.processor.driverHelper.isApplicationSubmittedDialogDisplayed()
         self.assertTrue(is_application_submitted_dialog_displayed, "Application submitted dialog is not displayed")
 
         # Check if the counter was updated
