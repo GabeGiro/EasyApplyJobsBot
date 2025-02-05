@@ -57,14 +57,14 @@ class Linkedin:
         if not self.driverHelper.checkIfLoggedIn():
             self.goToUrl("https://www.linkedin.com/login?trk=guest_homepage-basic_nav-header-signin")
 
-            logger.logDebugMessage("🔄 Trying to log in linkedin...", MessageTypes.INFO)
+            logger.logDebugMessage("🔄 Trying to login to linkedin...", MessageTypes.INFO)
             try:    
                 sleeper.interact(lambda : self.driver.find_element("id", "username").send_keys(config.email))
                 sleeper.interact(lambda : self.driver.find_element("id", "password").send_keys(config.password))
                 sleeper.interact(lambda : self.driver.find_element("xpath",'//button[@type="submit"]').click())
                 self.driverHelper.checkIfLoggedIn()
             except Exception as e:
-                logger.logDebugMessage("❌ Couldn't log in Linkedin by using Chrome. Please check your Linkedin credentials on config files line 7 and 8. If error continue you can define Chrome profile or run the bot on Firefox", MessageTypes.ERROR, e)
+                logger.logDebugMessage("❌ Couldn't login to Linkedin by using Chrome. Please check your Linkedin credentials on config files line 7 and 8. If error continue you can define Chrome profile or run the bot on Firefox", MessageTypes.ERROR, e)
         
         repository_wrapper.init()
 
