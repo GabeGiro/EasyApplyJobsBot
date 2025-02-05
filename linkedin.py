@@ -96,7 +96,7 @@ class Linkedin:
                         url = url + "&start=" + str(currentSearchResultPageJobs)
                         self.goToUrl(url)
 
-                        jobsForVerification = self.getJobsFromSearchPage()
+                        jobsForVerification = self.getJobsForVerificationFromSearchPage()
                         verifiedJobs = repository_wrapper.verify_jobs(jobsForVerification)
 
                         for job in verifiedJobs:
@@ -156,8 +156,8 @@ class Linkedin:
         return jobCounter
     
     
-    def getJobsFromSearchPage(self) -> List[models.JobForVerification]:
-        jobsListItems = self.driver.find_elements(By.CSS_SELECTOR, constants.jobCardContainerCSS)
+    def getJobsForVerificationFromSearchPage(self) -> List[models.JobForVerification]:
+        jobsListItems = self.getJobsListFromSearchPage()
         jobsForVerification = []
 
         for jobItem in jobsListItems:
@@ -165,7 +165,7 @@ class Linkedin:
                 utils.logDebugMessage("Not adding a job as already applied", MessageTypes.INFO)
                 continue
 
-            jobTitle = self.getJobTitleFromJobCard(jobItem)
+            jobTitle = self.getJobTitleFromJobCardInSearchResults(jobItem)
             if not jobTitle:
                 utils.logDebugMessage("Could not extract job title from job card", MessageTypes.WARNING)
                 continue
@@ -188,7 +188,7 @@ class Linkedin:
                 utils.logDebugMessage("Could not extract job ID from job card", MessageTypes.WARNING)
                 continue
 
-            workPlaceType = self.getWorkplaceTypeFromJobCardIfAvailable(jobItem)
+            workPlaceType = self.getWorkplaceTypeFromJobCardInSearchResults(jobItem)
 
             jobsForVerification.append(models.JobForVerification(
                 linkedinJobId=jobId.split(":")[-1],
@@ -215,7 +215,7 @@ class Linkedin:
         return None
 
 
-    def getJobTitleFromJobCard(self, jobItem) -> Optional[str]:
+    def getJobTitleFromJobCardInSearchResults(self, jobItem) -> Optional[str]:
         if (not self.exists(jobItem, By.CSS_SELECTOR, constants.jobCardTitleLinkCSS)):
             return None
         
@@ -223,7 +223,7 @@ class Linkedin:
         return element.get_attribute("aria-label").strip()
 
 
-    def getWorkplaceTypeFromJobCardIfAvailable(self, jobItem) -> str:
+    def getWorkplaceTypeFromJobCardInSearchResults(self, jobItem) -> str:
         description_spans = jobItem.find_elements(By.CSS_SELECTOR, constants.jobCardDescriptionCSS)
         if description_spans and len(description_spans) > 0:
             text = description_spans[0].text
@@ -638,7 +638,7 @@ class Linkedin:
 
     def find_jobs_from_search_page(self) -> list[models.JobForVerification]:
         self.goToJobsSearchPage()
-        jobs = self.getJobsFromSearchPage()
+        jobs = self.getJobsForVerificationFromSearchPage()
         return jobs
 
 
@@ -651,6 +651,10 @@ class Linkedin:
     def isQuestionsUnansweredErrorMessageDisplayed(self):
         return self.exists(self.driver, By.CSS_SELECTOR, constants.errorMessageForNecessaryFiledCSS)
 
+
+    def getJobsListFromSearchPage(self):
+        return self.driver.find_elements(By.CSS_SELECTOR, constants.jobCardContainerCSS)
+    
 
     def handleTextInput(self, group, questionLabel, by, value):
         # Locate the input element  
