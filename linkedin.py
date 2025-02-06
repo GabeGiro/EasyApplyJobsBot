@@ -65,7 +65,6 @@ class Linkedin:
                 self.driverHelper.checkIfLoggedIn()
             except Exception as e:
                 logger.logDebugMessage("❌ Couldn't login to Linkedin by using Chrome. Please check your Linkedin credentials on config files line 7 and 8. If error continue you can define Chrome profile or run the bot on Firefox", MessageTypes.ERROR, e)
-                self.driver.quit()
         
         repository_wrapper.init()
 
