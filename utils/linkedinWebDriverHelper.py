@@ -44,7 +44,7 @@ class WebDriverHelper:
 
     def __isResumePage(self):
         upload_button_present = self.exists(self.driver, By.CSS_SELECTOR, constants.buttonDocumentUploadCSS)
-        resume_container_present = self.exists(self.driver, By.CSS_SELECTOR, constants.resumeContainerCSS)
+        resume_container_present = self.exists(self.driver, By.CSS_SELECTOR, constants.divWithResumeCSS)
         return upload_button_present and resume_container_present
     
 
@@ -53,7 +53,7 @@ class WebDriverHelper:
             sleeper.interact(lambda : self.__clickIfExists(By.CSS_SELECTOR, constants.buttonShowMoreDocumentsCSS))
 
             # Find all CV container elements
-            cv_containers = self.driver.find_elements(By.CSS_SELECTOR, constants.resumeContainerCSS)
+            cv_containers = self.driver.find_elements(By.CSS_SELECTOR, constants.divWithResumeCSS)
 
             # Loop through the elements to find the desired CV
             for container in cv_containers:
@@ -135,13 +135,13 @@ class WebDriverHelper:
 
 
     def handleQuestions(self, jobProperties: models.Job):
-        if self.exists(self.driver, By.CSS_SELECTOR, "div.pb4"):
+        if self.exists(self.driver, By.CSS_SELECTOR, constants.divWithQuestionsCSS):
             # Locate the div that contains all the questions
-            questionsContainer = self.driver.find_element(By.CSS_SELECTOR, "div.pb4")
+            questionsContainer = self.driver.find_element(By.CSS_SELECTOR, constants.divWithQuestionsCSS)
 
-            if self.exists(questionsContainer, By.CSS_SELECTOR, "div.jobs-easy-apply-form-section__grouping"):
+            if self.exists(questionsContainer, By.CSS_SELECTOR, constants.divWithQuestionGroupsCSS):
                 # Find all question groups within that div
-                questionGroups = questionsContainer.find_elements(By.CSS_SELECTOR, "div.jobs-easy-apply-form-section__grouping")
+                questionGroups = questionsContainer.find_elements(By.CSS_SELECTOR, constants.divWithQuestionGroupsCSS)
 
                 # Iterate through each question group
                 for group in questionGroups:
@@ -164,17 +164,17 @@ class WebDriverHelper:
                         print("The div doesn't match either specified type")
                     """
 
-                    if self.exists(group, By.CSS_SELECTOR, "label.artdeco-text-input--label"):
+                    if self.exists(group, By.CSS_SELECTOR, constants.labelQuestionCSS):
                         # Find the label for the question within the group
-                        questionLabel = group.find_element(By.CSS_SELECTOR, "label.artdeco-text-input--label").text
+                        questionLabel = group.find_element(By.CSS_SELECTOR, constants.labelQuestionCSS).text
                         
                         # Determine the type of question and call the appropriate handler
-                        if self.exists(group, By.CSS_SELECTOR, "input.artdeco-text-input--input"):
-                            self.__handleTextInput(group, questionLabel, By.CSS_SELECTOR, "input.artdeco-text-input--input")
-                        elif self.exists(group, By.CSS_SELECTOR, "textarea"):
-                            self.__handleTextInput(group, questionLabel, By.CSS_SELECTOR, "textarea")
-                        elif self.exists(group, By.CSS_SELECTOR, "input[type='radio']"):
-                            self.__handleRadioInput(group, questionLabel, By.CSS_SELECTOR, "input[type='radio']")
+                        if self.exists(group, By.CSS_SELECTOR, constants.inputSingleLineTextCSS):
+                            self.__handleTextInput(group, questionLabel, By.CSS_SELECTOR, constants.inputSingleLineTextCSS)
+                        elif self.exists(group, By.CSS_SELECTOR, constants.inputTextAreaCSS):
+                            self.__handleTextInput(group, questionLabel, By.CSS_SELECTOR, constants.inputTextAreaCSS)
+                        elif self.exists(group, By.CSS_SELECTOR, constants.inputRadioCSS):
+                            self.__handleRadioInput(group, questionLabel, By.CSS_SELECTOR, constants.inputRadioCSS)
                         else:
                             self.__logUnhandledQuestion(questionLabel)
 
@@ -207,7 +207,7 @@ class WebDriverHelper:
         radioInputs = group.find_elements(by, value)
         for radioInput in radioInputs:
             # Retrieve the associated label
-            label = radioInput.find_element(By.XPATH, "./following-sibling::label").text
+            label = radioInput.find_element(By.XPATH, constants.labelRadioXPATH).text
             # TODO Check the backend for answers. If there is an answer for this question, fill it in
             # Check or uncheck based on some condition
             # if "desired option" in label:

@@ -44,11 +44,21 @@ buttonReviewApplicationCSS = "button[aria-label*='Review']"
 buttonShowMoreDocumentsCSS = "button[aria-label='Show more resumes']"
 buttonSubmitApplicationCSS = "button[aria-label='Submit application']"
 
+divWithResumeCSS = ".jobs-document-upload-redesign-card__container"
+divWithQuestionsCSS = "div.pb4"
+divWithQuestionGroupsCSS = "div.jobs-easy-apply-form-section__grouping"
+
 dialogApplicationSubmittedCSS = "div[data-test-modal][role='dialog']"
 
 errorMessageForNecessaryFiledCSS = "div.artdeco-inline-feedback.artdeco-inline-feedback--error[data-test-form-element-error-messages]"
 
+headerJobTitleCSS = "h1.t-24.t-bold.inline"
+
 followCheckboxCSS = "label[for='follow-company-checkbox']"
+
+inputRadioCSS = "input[type='radio']"
+inputSingleLineTextCSS = "input.artdeco-text-input--input"
+inputTextAreaCSS = "textarea"
 
 jobCardContainerCSS = "li[data-occludable-job-id]"
 jobCardCompanyCSS = "[class*='company-name']"
@@ -65,23 +75,43 @@ jobCardTitleLinkCSS = "a.job-card-list__title--link"
 # jobCardBaseTitleCSS = "[class*='base-card__title']"
 # jobCardTitleLabelCSS = "[aria-label*='job title']"
 
-profilePhotoCSS = "img.global-nav__me-photo.evi-image.ember-view"
+labelQuestionCSS = "label.artdeco-text-input--label"
 
-resumeContainerCSS = ".jobs-document-upload-redesign-card__container"
+profilePhotoCSS = "img.global-nav__me-photo.evi-image.ember-view"
 
 spanCSS = "span"
 
 
+# ID Selectors
+jobDetailsID = "job-details"
+passwordID = "password"
+usernameID = "username" 
+
+
 # Xpath Selectors
-offersPerPageXPATH = "//li[@data-occludable-job-id]"
-jobsPageCareerClassXPATH = "//div[contains(@class, 'careers')]"
-totalJobsXPATH = "//small"
-jobApplicationHeaderXPATH = "//h2[@id='jobs-apply-header']"
-multiplePagePercentageXPATH = """//progress[contains(@class, 'artdeco-completeness-meter-linear__progress-element')]"""
 appliedTextXPATH = ".//*[contains(text(), 'Applied')]"
 
+buttonSubmitLoginXPATH = '//button[@type="submit"]'
 
-# TO DO ADD OTHER PRINT CONSTANTS
+divWithJobCompanyXPATH = "//div[contains(@class, 'job-details-jobs-unified-top-card__company-name')]//a"
+divWithJobPagePrimaryDescriptionXPATH = "//div[contains(@class, 'job-details-jobs-unified-top-card__primary-description-container')]//div"
+
+jobApplicationHeaderXPATH = "//h2[@id='jobs-apply-header']"
+jobLocationXPATH = ".//span[contains(@class, 'tvm__text--low-emphasis')][1]"
+jobWorkplaceTypeXPATH = "//li[contains(@class, 'job-details-jobs-unified-top-card__job-insight')]/span/span"
+
+labelRadioXPATH = "./following-sibling::label"
+
+numberOfApplicantsSpanXPATH = ".//span[contains(@class, 'tvm__text--low-emphasis')]"
+
+multiplePagePercentageXPATH = """//progress[contains(@class, 'artdeco-completeness-meter-linear__progress-element')]"""
+
+offersPerPageXPATH = "//li[@data-occludable-job-id]"
+
+totalJobsXPATH = "//small"
+
+
+# TODO Add other print constants
 
 # Linkedin Constants
 ## Job Title Constants

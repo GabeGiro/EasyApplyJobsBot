@@ -16,7 +16,7 @@ class BaseTestCase(unittest.TestCase):
         super().tearDown()
         # driver.quit()
 
-
+    # TODO Move this to file.py
     def capture_test_failure_info(self, driver: webdriver.Chrome):
         """Capture screenshots and HTML content for debugging."""
 
