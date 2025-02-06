@@ -65,6 +65,7 @@ class Linkedin:
                 self.driverHelper.checkIfLoggedIn()
             except Exception as e:
                 logger.logDebugMessage("❌ Couldn't login to Linkedin by using Chrome. Please check your Linkedin credentials on config files line 7 and 8. If error continue you can define Chrome profile or run the bot on Firefox", MessageTypes.ERROR, e)
+                self.driver.quit()
         
         repository_wrapper.init()
 
@@ -141,16 +142,16 @@ class Linkedin:
 
         jobProperties = self.getJobPropertiesFromJobPage(jobID)
         repository_wrapper.update_job(jobProperties)
-        if self.isJobBlacklisted(company=jobProperties.company, title=jobProperties.title): 
+        if self.isJobBlacklisted(company = jobProperties.company, title = jobProperties.title): 
             jobCounter.skipped_blacklisted += 1
             lineToWrite = self.getLogTextForJobProperties(jobProperties, jobCounter) + " | " + "* 🤬 Blacklisted Job, skipped!: " + str(jobPage)
             resultFileWriter.displayWriteResults(lineToWrite)
             return jobCounter
 
         jobCounter = self.handleJobPost(
-            jobPage=jobPage, 
-            jobProperties=jobProperties, 
-            jobCounter=jobCounter)
+            jobPage = jobPage, 
+            jobProperties = jobProperties, 
+            jobCounter = jobCounter)
 
         return jobCounter
     
@@ -227,7 +228,7 @@ class Linkedin:
     # TODO Move to logger.py (after splitting utils.py)
     def getLogTextForJobProperties(self, jobProperties: models.Job, jobCounter: models.JobCounter):
         textToWrite = str(jobCounter.total) + " | " + jobProperties.title +  " | " + jobProperties.company +  " | " + jobProperties.location + " | " + jobProperties.workplace_type + " | " + jobProperties.posted_date + " | " + jobProperties.applicants_at_time_of_applying
-        if self.isJobBlacklisted(company=jobProperties.company, title=jobProperties.title):
+        if self.isJobBlacklisted(company = jobProperties.company, title = jobProperties.title):
             textToWrite = textToWrite + " | " + "blacklisted"
 
         return textToWrite
@@ -394,24 +395,24 @@ class Linkedin:
         return jobDescription
     
 
-    def isJobBlacklisted(self, company: str, title: str):
-        is_blacklisted = self.isCompanyBlacklisted(company)
+    def isJobBlacklisted(self, company: str, title: str, blacklistedCompanies: List[str] = config.blacklistCompanies, blacklistedTitles: List[str] = config.blackListTitles):
+        is_blacklisted = self.isCompanyBlacklisted(company, blacklistedCompanies)
         if is_blacklisted:
             return True
 
-        is_blacklisted = self.isTitleBlacklisted(title)
+        is_blacklisted = self.isTitleBlacklisted(title, blacklistedTitles)
         if is_blacklisted:
             return True
 
         return False
     
 
-    def isCompanyBlacklisted(self, company: str):
-        return any(blacklistedCompany.strip().lower() == company.lower() for blacklistedCompany in config.blacklistCompanies)
+    def isCompanyBlacklisted(self, company: str, blacklistedCompanies: List[str] = config.blacklistCompanies):
+        return any(blacklistedCompany.strip().lower() == company.lower() for blacklistedCompany in blacklistedCompanies)
     
 
-    def isTitleBlacklisted(self, title: str):
-        return any(blacklistedTitle.strip().lower() in title.lower() for blacklistedTitle in config.blackListTitles)
+    def isTitleBlacklisted(self, title: str, blacklistedTitles: List[str] = config.blackListTitles):
+        return any(blacklistedTitle.strip().lower() in title.lower() for blacklistedTitle in blacklistedTitles)
 
     
     def handleMultiplePages(self, jobPage, jobProperties: models.Job, jobCounter: models.JobCounter):
