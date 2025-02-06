@@ -199,18 +199,10 @@ class Linkedin:
 
 
     def getCompanyNameFromJobCardInSearchResults(self, jobItem) -> Optional[str]:
-        selectors = [
-            constants.jobCardCompanyNameCSS,
-            constants.jobCardSubtitleCSS, 
-            constants.jobCardMetadataCSS,
-            constants.jobCardCompanyCSS
-        ]
+        elements = jobItem.find_elements(By.CSS_SELECTOR, constants.jobCardCompanyNameCSS)
+        if elements and len(elements) > 0:
+            return utils.getFirstStringBeforeSeparators(elements[0].text)
         
-        for selector in selectors:
-            elements = jobItem.find_elements(By.CSS_SELECTOR, selector)
-            if elements and len(elements) > 0:
-                return utils.getFirstStringBeforeSeparators(elements[0].text)
-            
         return None
 
 

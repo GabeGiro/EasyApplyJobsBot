@@ -60,13 +60,10 @@ inputRadioCSS = "input[type='radio']"
 inputSingleLineTextCSS = "input.artdeco-text-input--input"
 inputTextAreaCSS = "textarea"
 
+jobCardCompanyNameCSS = "div.artdeco-entity-lockup__subtitle span"
 jobCardContainerCSS = "li[data-occludable-job-id]"
-jobCardCompanyCSS = "[class*='company-name']"
-jobCardCompanyNameCSS = "[data-tracking-control-name='public_jobs_company_name']"
 jobCardDescriptionCSS = "ul.job-card-container__metadata-wrapper"
 jobCardIdAttribute = "data-occludable-job-id"
-jobCardMetadataCSS = "[class*='job-card-container__metadata']"
-jobCardSubtitleCSS = "[class*='base-card__subtitle']"
 
 jobCardTitleLinkCSS = "a.job-card-list__title--link"
 # TODO Try adding other selectors to increase the number of job titles found
