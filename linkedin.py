@@ -222,12 +222,13 @@ class Linkedin:
 
 
     def getWorkplaceTypeFromJobCardInSearchResults(self, jobItem) -> str:
-        description_spans = jobItem.find_elements(By.CSS_SELECTOR, constants.jobCardDescriptionCSS)
-        if description_spans and len(description_spans) > 0:
-            text = description_spans[0].text
-            workplace_type = utils.extractTextWithinParentheses(text)
-            return self.verifyWorkPlaceType(workplace_type)
-        return ""
+        if not self.driverHelper.exists(jobItem, By.CSS_SELECTOR, constants.jobCardDescriptionCSS):
+            return ""
+        
+        jobCard = jobItem.find_element(By.CSS_SELECTOR, constants.jobCardDescriptionCSS)
+        descriptionSpan = jobCard.find_element(By.CSS_SELECTOR, constants.spanCSS)
+        workplace_type = utils.extractTextWithinParentheses(descriptionSpan.text)
+        return self.verifyWorkPlaceType(workplace_type)
 
 
     # TODO Move to logger.py (after splitting utils.py)
