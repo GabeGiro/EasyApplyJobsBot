@@ -59,9 +59,9 @@ class Linkedin:
 
             logger.logDebugMessage("🔄 Trying to login to linkedin...", MessageTypes.INFO)
             try:    
-                sleeper.interact(lambda : self.driver.find_element("id", "username").send_keys(config.email))
-                sleeper.interact(lambda : self.driver.find_element("id", "password").send_keys(config.password))
-                sleeper.interact(lambda : self.driver.find_element("xpath",'//button[@type="submit"]').click())
+                sleeper.interact(lambda : self.driver.find_element(By.ID, constants.usernameID).send_keys(config.email))
+                sleeper.interact(lambda : self.driver.find_element(By.ID, constants.passwordID).send_keys(config.password))
+                sleeper.interact(lambda : self.driver.find_element(By.XPATH, constants.buttonSubmitLoginXPATH).click())
                 self.driverHelper.checkIfLoggedIn()
             except Exception as e:
                 logger.logDebugMessage("❌ Couldn't login to Linkedin by using Chrome. Please check your Linkedin credentials on config files line 7 and 8. If error continue you can define Chrome profile or run the bot on Firefox", MessageTypes.ERROR, e)
@@ -108,6 +108,7 @@ class Linkedin:
 
         except Exception as e:
             logger.logDebugMessage("Unhandled exception in startApplying", MessageTypes.ERROR, e, True)
+            # TODO move this functionality to file.py
             self.driver.save_screenshot("unhandled_exception.png")
             with open("page_source_at_unhandled_exception.html", "w") as file:
                 file.write(self.driver.page_source)
@@ -271,8 +272,8 @@ class Linkedin:
         jobDescription = self.getJobDescriptionFromJobPage()
 
         # First, find the container that holds all the elements.
-        if self.driverHelper.exists(self.driverHelper.driver, By.XPATH, "//div[contains(@class, 'job-details-jobs-unified-top-card__primary-description-container')]//div"):
-            primary_description_div = self.driver.find_element(By.XPATH, "//div[contains(@class, 'job-details-jobs-unified-top-card__primary-description-container')]//div")
+        if self.driverHelper.exists(self.driverHelper.driver, By.XPATH, constants.divWithJobPagePrimaryDescriptionXPATH):
+            primary_description_div = self.driver.find_element(By.XPATH, constants.divWithJobPagePrimaryDescriptionXPATH)
             jobLocation = self.getJobLocationFromJobPage(primary_description_div)
             jobPostedDate = self.getJobPostedDateFromJobPage(primary_description_div)
             numberOfApplicants = self.getNumberOfApplicantsFromJobPage(primary_description_div)
@@ -295,7 +296,7 @@ class Linkedin:
         jobTitle = ""
 
         try:
-            jobTitleElement = self.driver.find_element(By.CSS_SELECTOR, "h1.t-24.t-bold.inline")
+            jobTitleElement = self.driver.find_element(By.CSS_SELECTOR, constants.headerJobTitleCSS)
             jobTitle = jobTitleElement.text.strip()
         except Exception as e:
             logger.logDebugMessage("in getting jobTitle", MessageTypes.WARNING, e)
@@ -306,9 +307,9 @@ class Linkedin:
     def getJobCompanyFromJobPage(self) -> str:
         jobCompany = ""
 
-        if self.driverHelper.exists(self.driverHelper.driver, By.XPATH, "//div[contains(@class, 'job-details-jobs-unified-top-card__company-name')]//a"):
+        if self.driverHelper.exists(self.driverHelper.driver, By.XPATH, constants.divWithJobCompanyXPATH):
             # Inside this container, find the company name link.
-            jobCompanyElement = self.driver.find_element(By.XPATH, "//div[contains(@class, 'job-details-jobs-unified-top-card__company-name')]//a")
+            jobCompanyElement = self.driver.find_element(By.XPATH, constants.divWithJobCompanyXPATH)
             jobCompany = jobCompanyElement.text.strip()
             
         else:
@@ -321,7 +322,7 @@ class Linkedin:
         jobLocation = ""
 
         try:
-            jobLocationSpan = primary_description_div.find_element(By.XPATH, ".//span[contains(@class, 'tvm__text--low-emphasis')][1]")
+            jobLocationSpan = primary_description_div.find_element(By.XPATH, constants.jobLocationXPATH)
             jobLocation = jobLocationSpan.text.strip()
         except Exception as e:
             logger.logDebugMessage("in getting jobLocation", MessageTypes.WARNING, e)
@@ -350,7 +351,7 @@ class Linkedin:
 
         try:
             # Find all spans with the class 'tvm__text--low-emphasis'
-            primaryDescriptionSpans = primary_description_div.find_elements(By.XPATH, ".//span[contains(@class, 'tvm__text--low-emphasis')]")
+            primaryDescriptionSpans = primary_description_div.find_elements(By.XPATH, constants.numberOfApplicantsSpanXPATH)
             # Loop through all found spans in reverse order because the number of applicants is usually the last one
             for span in reversed(primaryDescriptionSpans):
                 span_text = span.text.strip()
@@ -369,7 +370,7 @@ class Linkedin:
         jobWorkPlaceType = ""
 
         try:
-            jobWorkPlaceTypeElement = self.driver.find_element(By.XPATH, "//li[contains(@class, 'job-details-jobs-unified-top-card__job-insight')]/span/span")
+            jobWorkPlaceTypeElement = self.driver.find_element(By.XPATH, constants.jobWorkplaceTypeXPATH)
             firstSpanText = jobWorkPlaceTypeElement.text.strip().split('\n')[0]
             jobWorkPlaceType = self.verifyWorkPlaceType(firstSpanText)
         except Exception as e:
@@ -378,7 +379,7 @@ class Linkedin:
         return jobWorkPlaceType
     
 
-    # TODO Find a faster way to verify workplace type
+    # TODO Optimize: Find a faster way to verify workplace type
     def verifyWorkPlaceType(self, text: str) -> str:
         keywords = ["Remote", "On-site", "Hybrid"]
         if any(text in keyword for keyword in keywords):
@@ -393,7 +394,7 @@ class Linkedin:
 
         try:
             # Directly target the div with the specific ID that contains the job description
-            descriptionContainer = self.driver.find_element(By.ID, "job-details")
+            descriptionContainer = self.driver.find_element(By.ID, constants.jobDetailsID)
             jobDescription = descriptionContainer.text  # This should get all text within, including nested spans and divs
         except Exception as e:
             logger.logDebugMessage("in getting jobDescription: ", MessageTypes.WARNING, e)

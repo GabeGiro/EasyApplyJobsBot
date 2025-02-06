@@ -18,7 +18,7 @@ class WebDriverHelper:
 
 
     def checkIfLoggedIn(self):
-        if self.exists(self.driver, By.CSS_SELECTOR, "img.global-nav__me-photo.evi-image.ember-view"):
+        if self.exists(self.driver, By.CSS_SELECTOR, constants.profilePhotoCSS):
             logger.logDebugMessage("✅ Logged in Linkedin.", MessageTypes.SUCCESS)
             return True
         else:
@@ -30,11 +30,11 @@ class WebDriverHelper:
 
 
     def isEasyApplyButtonDisplayed(self):
-        return self.exists(self.driver, By.CSS_SELECTOR, constants.easyApplyButtonCSS)
+        return self.exists(self.driver, By.CSS_SELECTOR, constants.buttonEasyApplyCSS)
 
 
     def clickEasyApplyButton(self):
-        button = self.driver.find_element(By.CSS_SELECTOR, constants.easyApplyButtonCSS)
+        button = self.driver.find_element(By.CSS_SELECTOR, constants.buttonEasyApplyCSS)
         sleeper.interact(lambda : self.clickButton(button))
 
 
@@ -43,21 +43,21 @@ class WebDriverHelper:
 
 
     def __isResumePage(self):
-        upload_button_present = self.exists(self.driver, By.CSS_SELECTOR, "label.jobs-document-upload__upload-button")
-        resume_container_present = self.exists(self.driver, By.CSS_SELECTOR, "div.jobs-document-upload-redesign-card__container")
+        upload_button_present = self.exists(self.driver, By.CSS_SELECTOR, constants.buttonDocumentUploadCSS)
+        resume_container_present = self.exists(self.driver, By.CSS_SELECTOR, constants.divWithResumeCSS)
         return upload_button_present and resume_container_present
     
 
     def chooseResumeIfPossible(self, jobProperties: models.Job):
         if self.__isResumePage():
-            sleeper.interact(lambda : self.__clickIfExists(By.CSS_SELECTOR, "button[aria-label='Show more resumes']"))
+            sleeper.interact(lambda : self.__clickIfExists(By.CSS_SELECTOR, constants.buttonShowMoreDocumentsCSS))
 
             # Find all CV container elements
-            cv_containers = self.driver.find_elements(By.CSS_SELECTOR, ".jobs-document-upload-redesign-card__container")
+            cv_containers = self.driver.find_elements(By.CSS_SELECTOR, constants.divWithResumeCSS)
 
             # Loop through the elements to find the desired CV
             for container in cv_containers:
-                cv_name_element = container.find_element(By.CLASS_NAME, "jobs-document-upload-redesign-card__file-name")
+                cv_name_element = container.find_element(By.CLASS_NAME, constants.resumeNameElementClassName)
                 
                 if config.distinctCVKeyword[0] in cv_name_element.text:
                     # Check if CV is already selected
@@ -70,16 +70,16 @@ class WebDriverHelper:
                     break  
 
     def isNextButtonDisplayed(self):
-        return self.exists(self.driver, By.CSS_SELECTOR, constants.nextPageButtonCSS)
+        return self.exists(self.driver, By.CSS_SELECTOR, constants.buttonNextPageCSS)
 
 
     def clickNextButton(self):
-        button = self.driver.find_element(By.CSS_SELECTOR, constants.nextPageButtonCSS)
+        button = self.driver.find_element(By.CSS_SELECTOR, constants.buttonNextPageCSS)
         sleeper.interact(lambda : self.clickButton(button))
 
 
     def isLastApplicationStepDisplayed(self):
-        return self.exists(self.driver, By.CSS_SELECTOR, constants.reviewApplicationButtonCSS)
+        return self.exists(self.driver, By.CSS_SELECTOR, constants.buttonReviewApplicationCSS)
 
 
     def extract_percentage(self):
@@ -103,26 +103,26 @@ class WebDriverHelper:
     
 
     def clickReviewApplicationButton(self):
-        button = self.driver.find_element(By.CSS_SELECTOR, constants.reviewApplicationButtonCSS)
+        button = self.driver.find_element(By.CSS_SELECTOR, constants.buttonReviewApplicationCSS)
         sleeper.interact(lambda : self.clickButton(button))
 
 
     def isReviewApplicationStepDisplayed(self):
-        return self.exists(self.driver, By.CSS_SELECTOR, constants.submitApplicationButtonCSS)
+        return self.exists(self.driver, By.CSS_SELECTOR, constants.buttonSubmitApplicationCSS)
 
 
     def isSubmitButtonDisplayed(self):
-        return self.exists(self.driver, By.CSS_SELECTOR, constants.submitApplicationButtonCSS)
+        return self.exists(self.driver, By.CSS_SELECTOR, constants.buttonSubmitApplicationCSS)
 
 
     def clickSubmitApplicationButton(self):
-        button = self.driver.find_element(By.CSS_SELECTOR, constants.submitApplicationButtonCSS)
+        button = self.driver.find_element(By.CSS_SELECTOR, constants.buttonSubmitApplicationCSS)
         sleeper.interact(lambda : self.clickButton(button))
 
 
     def isApplicationSubmittedDialogDisplayed(self):
-        dialog = self.driver.find_element(By.CSS_SELECTOR, "div[data-test-modal][role='dialog']")
-        dismiss_button_present = self.exists(dialog, By.CSS_SELECTOR, "button[aria-label='Dismiss']")
+        dialog = self.driver.find_element(By.CSS_SELECTOR, constants.dialogApplicationSubmittedCSS)
+        dismiss_button_present = self.exists(dialog, By.CSS_SELECTOR, constants.buttonDismissCSS)
         return dismiss_button_present
 
 
@@ -135,13 +135,13 @@ class WebDriverHelper:
 
 
     def handleQuestions(self, jobProperties: models.Job):
-        if self.exists(self.driver, By.CSS_SELECTOR, "div.pb4"):
+        if self.exists(self.driver, By.CSS_SELECTOR, constants.divWithQuestionsCSS):
             # Locate the div that contains all the questions
-            questionsContainer = self.driver.find_element(By.CSS_SELECTOR, "div.pb4")
+            questionsContainer = self.driver.find_element(By.CSS_SELECTOR, constants.divWithQuestionsCSS)
 
-            if self.exists(questionsContainer, By.CSS_SELECTOR, "div.jobs-easy-apply-form-section__grouping"):
+            if self.exists(questionsContainer, By.CSS_SELECTOR, constants.divWithQuestionGroupsCSS):
                 # Find all question groups within that div
-                questionGroups = questionsContainer.find_elements(By.CSS_SELECTOR, "div.jobs-easy-apply-form-section__grouping")
+                questionGroups = questionsContainer.find_elements(By.CSS_SELECTOR, constants.divWithQuestionGroupsCSS)
 
                 # Iterate through each question group
                 for group in questionGroups:
@@ -164,17 +164,17 @@ class WebDriverHelper:
                         print("The div doesn't match either specified type")
                     """
 
-                    if self.exists(group, By.CSS_SELECTOR, "label.artdeco-text-input--label"):
+                    if self.exists(group, By.CSS_SELECTOR, constants.labelQuestionCSS):
                         # Find the label for the question within the group
-                        questionLabel = group.find_element(By.CSS_SELECTOR, "label.artdeco-text-input--label").text
+                        questionLabel = group.find_element(By.CSS_SELECTOR, constants.labelQuestionCSS).text
                         
                         # Determine the type of question and call the appropriate handler
-                        if self.exists(group, By.CSS_SELECTOR, "input.artdeco-text-input--input"):
-                            self.__handleTextInput(group, questionLabel, By.CSS_SELECTOR, "input.artdeco-text-input--input")
-                        elif self.exists(group, By.CSS_SELECTOR, "textarea"):
-                            self.__handleTextInput(group, questionLabel, By.CSS_SELECTOR, "textarea")
-                        elif self.exists(group, By.CSS_SELECTOR, "input[type='radio']"):
-                            self.__handleRadioInput(group, questionLabel, By.CSS_SELECTOR, "input[type='radio']")
+                        if self.exists(group, By.CSS_SELECTOR, constants.inputSingleLineTextCSS):
+                            self.__handleTextInput(group, questionLabel, By.CSS_SELECTOR, constants.inputSingleLineTextCSS)
+                        elif self.exists(group, By.CSS_SELECTOR, constants.inputTextAreaCSS):
+                            self.__handleTextInput(group, questionLabel, By.CSS_SELECTOR, constants.inputTextAreaCSS)
+                        elif self.exists(group, By.CSS_SELECTOR, constants.inputRadioCSS):
+                            self.__handleRadioInput(group, questionLabel, By.CSS_SELECTOR, constants.inputRadioCSS)
                         else:
                             self.__logUnhandledQuestion(questionLabel)
 
@@ -207,7 +207,7 @@ class WebDriverHelper:
         radioInputs = group.find_elements(by, value)
         for radioInput in radioInputs:
             # Retrieve the associated label
-            label = radioInput.find_element(By.XPATH, "./following-sibling::label").text
+            label = radioInput.find_element(By.XPATH, constants.labelRadioXPATH).text
             # TODO Check the backend for answers. If there is an answer for this question, fill it in
             # Check or uncheck based on some condition
             # if "desired option" in label:
