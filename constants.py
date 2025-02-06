@@ -31,30 +31,32 @@ testJobUrl = "https://www.linkedin.com/jobs/search/?currentJobId=3577461385&dist
 testPageUrl = testJobUrl +"&start="+ str(2)
 
 
-# Xpath Selectors
-offersPerPageXPATH = "//li[@data-occludable-job-id]"
-jobsPageCareerClassXPATH = "//div[contains(@class, 'careers')]"
-totalJobsXPATH = "//small"
-jobApplicationHeaderXPATH = "//h2[@id='jobs-apply-header']"
-multiplePagePercentageXPATH = """//progress[contains(@class, 'artdeco-completeness-meter-linear__progress-element')]"""
-appliedTextXPATH = ".//*[contains(text(), 'Applied')]"
+# Class Name Selectors
+resumeNameElementClassName = "jobs-document-upload-redesign-card__file-name"
+
 
 # CSS Selectors
-spanCSS = "span"
-easyApplyButtonCSS = "button[aria-label*='Easy Apply']"
-nextPageButtonCSS = "button[aria-label='Continue to next step']"
-reviewApplicationButtonCSS = "button[aria-label*='Review']"
-submitApplicationButtonCSS = "button[aria-label='Submit application']"
+buttonDismissCSS = "button[aria-label='Dismiss']"
+buttonDocumentUploadCSS = "label.jobs-document-upload__upload-button"
+buttonEasyApplyCSS = "button[aria-label*='Easy Apply']"
+buttonNextPageCSS = "button[aria-label='Continue to next step']"
+buttonReviewApplicationCSS = "button[aria-label*='Review']"
+buttonShowMoreDocumentsCSS = "button[aria-label='Show more resumes']"
+buttonSubmitApplicationCSS = "button[aria-label='Submit application']"
+
+dialogApplicationSubmittedCSS = "div[data-test-modal][role='dialog']"
+
 errorMessageForNecessaryFiledCSS = "div.artdeco-inline-feedback.artdeco-inline-feedback--error[data-test-form-element-error-messages]"
+
 followCheckboxCSS = "label[for='follow-company-checkbox']"
 
-jobCardCompanyNameCSS = "[data-tracking-control-name='public_jobs_company_name']"
-jobCardSubtitleCSS = "[class*='base-card__subtitle']"
-jobCardMetadataCSS = "[class*='job-card-container__metadata']"
-jobCardCompanyCSS = "[class*='company-name']"
-jobCardDescriptionCSS = "ul.job-card-container__metadata-wrapper"
 jobCardContainerCSS = "li[data-occludable-job-id]"
+jobCardCompanyCSS = "[class*='company-name']"
+jobCardCompanyNameCSS = "[data-tracking-control-name='public_jobs_company_name']"
+jobCardDescriptionCSS = "ul.job-card-container__metadata-wrapper"
 jobCardIdAttribute = "data-occludable-job-id"
+jobCardMetadataCSS = "[class*='job-card-container__metadata']"
+jobCardSubtitleCSS = "[class*='base-card__subtitle']"
 
 jobCardTitleLinkCSS = "a.job-card-list__title--link"
 # TODO Try adding other selectors to increase the number of job titles found
@@ -62,6 +64,21 @@ jobCardTitleLinkCSS = "a.job-card-list__title--link"
 # jobCardTitleHeadingCSS = "h3[class*='job-card-list__title']"
 # jobCardBaseTitleCSS = "[class*='base-card__title']"
 # jobCardTitleLabelCSS = "[aria-label*='job title']"
+
+profilePhotoCSS = "img.global-nav__me-photo.evi-image.ember-view"
+
+resumeContainerCSS = ".jobs-document-upload-redesign-card__container"
+
+spanCSS = "span"
+
+
+# Xpath Selectors
+offersPerPageXPATH = "//li[@data-occludable-job-id]"
+jobsPageCareerClassXPATH = "//div[contains(@class, 'careers')]"
+totalJobsXPATH = "//small"
+jobApplicationHeaderXPATH = "//h2[@id='jobs-apply-header']"
+multiplePagePercentageXPATH = """//progress[contains(@class, 'artdeco-completeness-meter-linear__progress-element')]"""
+appliedTextXPATH = ".//*[contains(text(), 'Applied')]"
 
 
 # TO DO ADD OTHER PRINT CONSTANTS
