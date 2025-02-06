@@ -6,9 +6,9 @@ from models import Job, JobCounter
 
 class test_skipping_jobs(unittest.TestCase):
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(self):
         # This will be executed once for the test class
-        cls.processor = JobProcessor()
+        self.processor = JobProcessor()
 
     def setUp(self):
         # This will be executed before each test method

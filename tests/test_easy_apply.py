@@ -10,22 +10,22 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
     easy_apply_jobs_from_search_page: List[JobForVerification] = []
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(self):
         # This will be executed once for the test class
-        cls.processor = JobProcessor()
+        self.processor = JobProcessor()
 
         # Get the jobs from the search page
-        cls.easy_apply_jobs_from_search_page = cls.find_easy_apply_jobs_from_search_page()
+        self.easy_apply_jobs_from_search_page = self.find_easy_apply_jobs_from_search_page()
 
 
     # TODO extract and use this method in linkedin.py
     @classmethod
-    def find_easy_apply_jobs_from_search_page(cls) -> list[JobForVerification]:
+    def find_easy_apply_jobs_from_search_page(self) -> list[JobForVerification]:
         # Open the Linkedin general job search page
-        cls.processor.goToEasyApplyJobsSearchPage()
+        self.processor.goToEasyApplyJobsSearchPage()
 
         # Get the jobs from the search page
-        jobs = cls.processor.getJobsForVerificationFromSearchPage()
+        jobs = self.processor.getJobsForVerificationFromSearchPage()
         return jobs
 
 
