@@ -37,14 +37,31 @@ jobsPageCareerClassXPATH = "//div[contains(@class, 'careers')]"
 totalJobsXPATH = "//small"
 jobApplicationHeaderXPATH = "//h2[@id='jobs-apply-header']"
 multiplePagePercentageXPATH = """//progress[contains(@class, 'artdeco-completeness-meter-linear__progress-element')]"""
+appliedTextXPATH = ".//*[contains(text(), 'Applied')]"
 
 # CSS Selectors
+spanCSS = "span"
 easyApplyButtonCSS = "button[aria-label*='Easy Apply']"
 nextPageButtonCSS = "button[aria-label='Continue to next step']"
 reviewApplicationButtonCSS = "button[aria-label*='Review']"
 submitApplicationButtonCSS = "button[aria-label='Submit application']"
 errorMessageForNecessaryFiledCSS = "div.artdeco-inline-feedback.artdeco-inline-feedback--error[data-test-form-element-error-messages]"
 followCheckboxCSS = "label[for='follow-company-checkbox']"
+
+jobCardCompanyNameCSS = "[data-tracking-control-name='public_jobs_company_name']"
+jobCardSubtitleCSS = "[class*='base-card__subtitle']"
+jobCardMetadataCSS = "[class*='job-card-container__metadata']"
+jobCardCompanyCSS = "[class*='company-name']"
+jobCardDescriptionCSS = "ul.job-card-container__metadata-wrapper"
+jobCardContainerCSS = "li[data-occludable-job-id]"
+jobCardIdAttribute = "data-occludable-job-id"
+
+jobCardTitleLinkCSS = "a.job-card-list__title--link"
+# TODO Try adding other selectors to increase the number of job titles found
+# jobCardTitleLinkCSS = "a[class*='job-card-list__title']"
+# jobCardTitleHeadingCSS = "h3[class*='job-card-list__title']"
+# jobCardBaseTitleCSS = "[class*='base-card__title']"
+# jobCardTitleLabelCSS = "[aria-label*='job title']"
 
 
 # TO DO ADD OTHER PRINT CONSTANTS
@@ -73,19 +90,3 @@ job_title_codes = {
     'Python Developer': "25169",
 }
 
-appliedTextXPATH = ".//*[contains(text(), 'Applied')]"
-jobCardCompanyNameCSS = "[data-tracking-control-name='public_jobs_company_name']"
-jobCardSubtitleCSS = "[class*='base-card__subtitle']"
-jobCardMetadataCSS = "[class*='job-card-container__metadata']"
-jobCardCompanyCSS = "[class*='company-name']"
-
-jobCardTitleLinkCSS = "a.job-card-list__title--link"
-# TODO Try adding other selectors to increase the number of job titles found
-# jobCardTitleLinkCSS = "a[class*='job-card-list__title']"
-# jobCardTitleHeadingCSS = "h3[class*='job-card-list__title']"
-# jobCardBaseTitleCSS = "[class*='base-card__title']"
-# jobCardTitleLabelCSS = "[aria-label*='job title']"
-
-jobCardDescriptionCSS = "span.job-card-container__primary-description"
-jobCardContainerCSS = "li[data-occludable-job-id]"
-jobCardIdAttribute = "data-occludable-job-id"
