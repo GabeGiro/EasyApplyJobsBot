@@ -1,5 +1,6 @@
 import time
 import os
+import logging
 
 import utils.logger as logger
 from utils.logger import MessageTypes
@@ -43,6 +44,29 @@ def __writeResultsIntoFile(text: str):
     except Exception as e:
         logger.logDebugMessage("Error in writeResults", logger.MessageTypes.ERROR, e)
 
+
+def create_directory(path : str):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
+def capture_screenshot(driver, screenshot_path):
+    try:
+        driver.save_screenshot(screenshot_path)
+    except Exception as e:
+        logging.error(f"Failed to capture screenshot: {e}")
+
+
+def capture_html(driver, html_path):
+    try:
+        with open(html_path, 'w', encoding='utf-8') as f:
+            f.write(driver.page_source)
+    except Exception as e:
+        logging.error(f"Failed to capture HTML: {e}")
+
+
+def join_paths(*paths):
+    return os.path.join(*paths)
 
 # def __writeResults(text: str):
 #     timeStr = time.strftime("%Y%m%d")

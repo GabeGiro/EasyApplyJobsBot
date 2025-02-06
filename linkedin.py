@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
+
 import config
 import constants
 import models
@@ -107,11 +108,12 @@ class Linkedin:
                     " jobs out of " + str(jobCounter.total) + ".", MessageTypes.SUCCESS)
 
         except Exception as e:
-            logger.logDebugMessage("Unhandled exception in startApplying", MessageTypes.ERROR, e, True)
-            # TODO move this functionality to file.py
-            self.driver.save_screenshot("unhandled_exception.png")
-            with open("page_source_at_unhandled_exception.html", "w") as file:
-                file.write(self.driver.page_source)
+            logger.logDebugMessage("Unhandled exception in StartApplying", logger.MessageTypes.ERROR, e, True)
+
+            resultFileWriter.capture_screenshot("unhandeled_exception.png")
+
+            resultFileWriter.capture_html(self.driver, "page_source_as_unhandled_exception.html")
+            
 
 
     def goToJobsSearchPage(self):

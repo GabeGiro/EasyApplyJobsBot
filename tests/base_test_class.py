@@ -1,7 +1,9 @@
 import unittest
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
-import os
+
+import utils.file as resultFileWriter
+
 
 class BaseTestCase(unittest.TestCase):
 
@@ -16,35 +18,31 @@ class BaseTestCase(unittest.TestCase):
         super().tearDown()
         # driver.quit()
 
-    # TODO Move this to file.py
+    
     def capture_test_failure_info(self, driver: webdriver.Chrome):
         """Capture screenshots and HTML content for debugging."""
 
         try:
-            if not os.path.exists('data'):
-                os.makedirs('data')
-
-            if not os.path.exists('data/tests'):
-                os.makedirs('data/tests')
+            resultFileWriter.create_directory('data')
+            resultFileWriter.create_directory('data/tests')
+               
 
             id = self.id()
             class_name = id.split('.')[0]
             method_name = id.split('.')[-1]
 
-            test_directory = os.path.join('data/tests', class_name, method_name)
+            test_directory = resultFileWriter.join_paths('data/tests', class_name, method_name)
             
-            if not os.path.exists(test_directory):
-                os.makedirs(test_directory)
+            resultFileWriter.create_directory(test_directory)
             
-            screenshot_path = os.path.join(test_directory, "screenshot.png")
-            html_path = os.path.join(test_directory, "page.html")
+            screenshot_path = resultFileWriter.join_paths(test_directory, "screenshot.png")
+            html_path = resultFileWriter.join_paths(test_directory, "page.html")
 
             # Capture screenshot
-            driver.save_screenshot(screenshot_path)
+            resultFileWriter.capture_screenshot(driver, screenshot_path)
             
             # Capture HTML content
-            with open(html_path, 'w', encoding='utf-8') as f:
-                f.write(driver.page_source)
+            resultFileWriter.capture_html(driver, html_path)
 
         except WebDriverException as e:
             print(f"Failed to capture screenshot or HTML: {e}")
