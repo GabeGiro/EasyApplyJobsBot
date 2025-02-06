@@ -108,7 +108,7 @@ class Linkedin:
                     " jobs out of " + str(jobCounter.total) + ".", MessageTypes.SUCCESS)
 
         except Exception as e:
-            logger.logDebugMessage("Unhandled exception in StartApplying", logger.MessageTypes.ERROR, e, True)
+            logger.logDebugMessage("Unhandled exception in StartApplying", MessageTypes.ERROR, e, True)
 
             resultFileWriter.capture_screenshot("unhandeled_exception.png")
 
