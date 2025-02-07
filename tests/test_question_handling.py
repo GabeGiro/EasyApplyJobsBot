@@ -9,50 +9,50 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
     job_with_unanswered_questions: JobForVerification = None
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(self):
         # This will be executed once for the test class
-        cls.processor = JobProcessor()
+        self.processor = JobProcessor()
 
         # Get the jobs from the search page
-        easy_apply_jobs_from_search_page = cls.find_easy_apply_jobs_from_search_page()
-        cls.job_with_unanswered_questions = cls.find_job_with_unanswered_questions(easy_apply_jobs_from_search_page)
+        easy_apply_jobs_from_search_page = self.find_easy_apply_jobs_from_search_page()
+        self.job_with_unanswered_questions = self.find_job_with_unanswered_questions(easy_apply_jobs_from_search_page)
 
 
     # TODO extract and use this method in linkedin.py
     @classmethod
-    def find_easy_apply_jobs_from_search_page(cls) -> list[JobForVerification]:
+    def find_easy_apply_jobs_from_search_page(self) -> list[JobForVerification]:
         # Open the Linkedin general job search page
-        cls.processor.goToEasyApplyJobsSearchPage()
+        self.processor.goToEasyApplyJobsSearchPage()
 
         # Get the jobs from the search page
-        jobs = cls.processor.getJobsForVerificationFromSearchPage()
+        jobs = self.processor.getJobsForVerificationFromSearchPage()
         return jobs
 
 
     @classmethod
-    def find_job_with_unanswered_questions(cls, jobs: list[JobForVerification]) -> JobForVerification:
+    def find_job_with_unanswered_questions(self, jobs: list[JobForVerification]) -> JobForVerification:
         for job in jobs:
-            cls.processor.goToJobPage(job.linkedinJobId)
+            self.processor.goToJobPage(job.linkedinJobId)
 
-            is_easy_apply_button_displayed = cls.processor.driverHelper.isEasyApplyButtonDisplayed()
+            is_easy_apply_button_displayed = self.processor.driverHelper.isEasyApplyButtonDisplayed()
             if not is_easy_apply_button_displayed:
                 continue
 
-            cls.processor.driverHelper.clickEasyApplyButton()
+            self.processor.driverHelper.clickEasyApplyButton()
 
-            is_application_popup_displayed = cls.processor.driverHelper.isApplicationPopupDisplayed()
+            is_application_popup_displayed = self.processor.driverHelper.isApplicationPopupDisplayed()
             if not is_application_popup_displayed:
                 continue
 
-            while cls.processor.driverHelper.isNextButtonDisplayed():
-                cls.processor.driverHelper.clickNextButton()
-                if cls.processor.driverHelper.isQuestionsUnansweredErrorMessageDisplayed():
+            while self.processor.driverHelper.isNextButtonDisplayed():
+                self.processor.driverHelper.clickNextButton()
+                if self.processor.driverHelper.isQuestionsUnansweredErrorMessageDisplayed():
                     return job
                 
-            if cls.processor.driverHelper.isLastApplicationStepDisplayed():
-                cls.processor.driverHelper.clickReviewApplicationButton()
+            if self.processor.driverHelper.isLastApplicationStepDisplayed():
+                self.processor.driverHelper.clickReviewApplicationButton()
 
-            if cls.processor.driverHelper.isQuestionsUnansweredErrorMessageDisplayed():
+            if self.processor.driverHelper.isQuestionsUnansweredErrorMessageDisplayed():
                 return job
 
 

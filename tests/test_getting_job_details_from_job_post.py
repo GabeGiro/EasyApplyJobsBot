@@ -9,12 +9,12 @@ class test_getting_job_details_from_linkedin_job_post(BaseTestCase):
     jobs_from_search_page = []
     
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(self):
         # This will be executed once for the test class
-        cls.processor = JobProcessor()
+        self.processor = JobProcessor()
 
         # Get the jobs from the search page
-        cls.jobs_from_search_page = cls.processor.find_jobs_from_search_page()
+        self.jobs_from_search_page = self.processor.find_jobs_from_search_page()
 
 
     def setUp(self):
