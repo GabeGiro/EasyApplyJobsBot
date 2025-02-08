@@ -110,9 +110,9 @@ class Linkedin:
         except Exception as e:
             logger.logDebugMessage("Unhandled exception in StartApplying", MessageTypes.ERROR, e, True)
 
-            resultFileWriter.capture_screenshot("unhandeled_exception.png")
+            resultFileWriter.captureScreenshot(self.driver, "unhandeled_exception.png")
 
-            resultFileWriter.capture_html(self.driver, "page_source_as_unhandled_exception.html")
+            resultFileWriter.captureHtml(self.driver, "page_source_at_unhandled_exception.html")
             
 
 

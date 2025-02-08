@@ -23,26 +23,26 @@ class BaseTestCase(unittest.TestCase):
         """Capture screenshots and HTML content for debugging."""
 
         try:
-            resultFileWriter.create_directory('data')
-            resultFileWriter.create_directory('data/tests')
+            resultFileWriter.createDirectory('data')
+            resultFileWriter.createDirectory('data/tests')
                
 
             id = self.id()
-            class_name = id.split('.')[0]
-            method_name = id.split('.')[-1]
+            className = id.split('.')[0]
+            methodName = id.split('.')[-1]
 
-            test_directory = resultFileWriter.join_paths('data/tests', class_name, method_name)
+            testDirectory = resultFileWriter.joinPaths('data/tests', className, methodName)
             
-            resultFileWriter.create_directory(test_directory)
+            resultFileWriter.createDirectory(testDirectory)
             
-            screenshot_path = resultFileWriter.join_paths(test_directory, "screenshot.png")
-            html_path = resultFileWriter.join_paths(test_directory, "page.html")
+            screenshotPath = resultFileWriter.joinPaths(testDirectory, "screenshot.png")
+            htmlPath = resultFileWriter.joinPaths(testDirectory, "page.html")
 
             # Capture screenshot
-            resultFileWriter.capture_screenshot(driver, screenshot_path)
+            resultFileWriter.captureScreenshot(driver, screenshotPath)
             
             # Capture HTML content
-            resultFileWriter.capture_html(driver, html_path)
+            resultFileWriter.captureHtml(driver, htmlPath)
 
         except WebDriverException as e:
             print(f"Failed to capture screenshot or HTML: {e}")

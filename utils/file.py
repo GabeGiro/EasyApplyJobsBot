@@ -4,6 +4,7 @@ import logging
 
 import utils.logger as logger
 from utils.logger import MessageTypes
+from selenium.webdriver.remote.webdriver import WebDriver
 
 
 def displayWriteResults(lineToWrite: str):
@@ -45,19 +46,19 @@ def __writeResultsIntoFile(text: str):
         logger.logDebugMessage("Error in writeResults", logger.MessageTypes.ERROR, e)
 
 
-def create_directory(path : str):
+def createDirectory(path : str):
     if not os.path.exists(path):
         os.makedirs(path)
 
 
-def capture_screenshot(driver, screenshot_path):
+def captureScreenshot(driver : WebDriver, screenshot_path : str):
     try:
         driver.save_screenshot(screenshot_path)
     except Exception as e:
         logging.error(f"Failed to capture screenshot: {e}")
 
 
-def capture_html(driver, html_path):
+def captureHtml(driver : WebDriver, html_path : str):
     try:
         with open(html_path, 'w', encoding='utf-8') as f:
             f.write(driver.page_source)
@@ -65,7 +66,7 @@ def capture_html(driver, html_path):
         logging.error(f"Failed to capture HTML: {e}")
 
 
-def join_paths(*paths):
+def joinPaths(*paths : str):
     return os.path.join(*paths)
 
 # def __writeResults(text: str):
