@@ -19,7 +19,7 @@ def logDebugMessage(message, messageType = MessageTypes.INFO, exception = Except
             case MessageTypes.WARNING:
                 __prYellow(f"⚠️ Warning ⚠️ {message}: {str(exception)[0:100]}")
             case MessageTypes.ERROR:
-                __prRed(f"❌ Error ❌ {message}: {str(exception)[0:100]}")
+                __prRed(f"❌ Error ❌ {message}: {str(exception)[0:200]}")
             case MessageTypes.SUCCESS:
                 __prGreen(f"✅ {message}")
 
