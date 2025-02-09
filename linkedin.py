@@ -108,12 +108,9 @@ class Linkedin:
                     " jobs out of " + str(jobCounter.total) + ".", MessageTypes.SUCCESS)
 
         except Exception as e:
-            logger.logDebugMessage("Unhandled exception in StartApplying", MessageTypes.ERROR, e, True)
-
+            logger.logDebugMessage("Unhandled exception in StartApplying", MessageTypes.ERROR, e, True)           
             resultFileWriter.captureScreenshot(self.driver, "unhandeled_exception.png")
-
-            resultFileWriter.captureHtml(self.driver, "page_source_at_unhandled_exception.html")
-            
+            resultFileWriter.captureHtml(self.driver, "page_source_at_unhandled_exception.html")           
 
 
     def goToJobsSearchPage(self):
