@@ -1,13 +1,13 @@
 import unittest
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
-import os
+import utils.file as resultFileWriter  
+
 
 class BaseTestCase(unittest.TestCase):
 
     def tearDown(self, driver: webdriver.Chrome):
-        """Capture screenshot and HTML content if the test fails."""
-
+        #Capture screenshot and HTML content if the test fails
         test_exceptions = self._outcome.result.errors
         test_failures = self._outcome.result.failures
         if any(error for (_, error) in test_exceptions) or test_failures:
@@ -16,35 +16,28 @@ class BaseTestCase(unittest.TestCase):
         super().tearDown()
         # driver.quit()
 
-    # TODO Move this to file.py
+    
     def capture_test_failure_info(self, driver: webdriver.Chrome):
-        """Capture screenshots and HTML content for debugging."""
-
+        #Capture screenshots and HTML content for debugging
         try:
-            if not os.path.exists('data'):
-                os.makedirs('data')
-
-            if not os.path.exists('data/tests'):
-                os.makedirs('data/tests')
-
+            resultFileWriter.createDirectory('data')
+            resultFileWriter.createDirectory('data/tests')
+            
             id = self.id()
-            class_name = id.split('.')[0]
-            method_name = id.split('.')[-1]
+            className = id.split('.')[0]
+            methodName = id.split('.')[-1]
 
-            test_directory = os.path.join('data/tests', class_name, method_name)
+            testDirectory = resultFileWriter.joinPaths('data/tests', className, methodName)            
+            resultFileWriter.createDirectory(testDirectory)
             
-            if not os.path.exists(test_directory):
-                os.makedirs(test_directory)
-            
-            screenshot_path = os.path.join(test_directory, "screenshot.png")
-            html_path = os.path.join(test_directory, "page.html")
+            screenshotPath = resultFileWriter.joinPaths(testDirectory, "screenshot.png")
+            htmlPath = resultFileWriter.joinPaths(testDirectory, "page.html")
 
             # Capture screenshot
-            driver.save_screenshot(screenshot_path)
+            resultFileWriter.captureScreenshot(driver, screenshotPath)
             
             # Capture HTML content
-            with open(html_path, 'w', encoding='utf-8') as f:
-                f.write(driver.page_source)
+            resultFileWriter.captureHtml(driver, htmlPath)
 
         except WebDriverException as e:
             print(f"Failed to capture screenshot or HTML: {e}")
