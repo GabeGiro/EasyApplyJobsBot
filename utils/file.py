@@ -51,16 +51,16 @@ def createDirectory(path: str):
         os.makedirs(path)
 
 
-def captureScreenshot(driver: webdriver, screenshot_path: str):
+def captureScreenshot(driver: webdriver.Chrome, screenshotPath: str):
     try:
-        driver.save_screenshot(screenshot_path)
+        driver.save_screenshot(screenshotPath)
     except Exception as e:
         logging.error(f"Failed to capture screenshot: {e}")
 
 
-def captureHtml(driver: webdriver, html_path: str):
+def captureHtml(driver: webdriver.Chrome, htmlPath: str):
     try:
-        with open(html_path, 'w', encoding='utf-8') as f:
+        with open(htmlPath, 'w', encoding='utf-8') as f:
             f.write(driver.page_source)
     except Exception as e:
         logging.error(f"Failed to capture HTML: {e}")

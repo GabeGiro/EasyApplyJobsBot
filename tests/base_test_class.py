@@ -1,8 +1,7 @@
 import unittest
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
-
-import utils.file as resultFileWriter
+import utils.file as resultFileWriter  
 
 
 class BaseTestCase(unittest.TestCase):
